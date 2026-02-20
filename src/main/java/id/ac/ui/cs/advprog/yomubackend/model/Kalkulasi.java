@@ -20,7 +20,18 @@ public class Kalkulasi {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * First operand.
+     */
     private int angkaPertama;
+
+    /**
+     * Second operand.
+     */
     private int angkaKedua;
+
+    /**
+     * Result of the calculation.
+     */
     private int hasil;
 }
