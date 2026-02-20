@@ -1,26 +1,27 @@
 package id.ac.ui.cs.advprog.yomubackend.controller;
 
-import id.ac.ui.cs.advprog.yomubackend.model.Kalkulasi;
-import id.ac.ui.cs.advprog.yomubackend.repository.KalkulasiRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import id.ac.ui.cs.advprog.yomubackend.model.Kalkulasi;
+import id.ac.ui.cs.advprog.yomubackend.repository.KalkulasiRepository;
+
 @Controller
-public class KalkulasiController {
+public final class KalkulasiController {
 
-    private final KalkulasiRepository repository;
+    private final KalkulasiRepository repo;
 
-    public KalkulasiController(KalkulasiRepository repository) {
-        this.repository = repository;
+    public KalkulasiController(final KalkulasiRepository repository) {
+        this.repo = repository;
     }
 
     @GetMapping("/")
     public String tampilkanHalamanUtama(Model model) {
         // Ambil semua data riwayat dari database, lalu lempar ke file HTML
-        model.addAttribute("riwayatKalkulasi", repository.findAll());
+        model.addAttribute("riwayatKalkulasi", repo.findAll());
         return "index"; // Akan mencari file bernama "index.html"
     }
 
@@ -32,7 +33,7 @@ public class KalkulasiController {
         dataBaru.setAngkaPertama(angka1);
         dataBaru.setAngkaKedua(angka2);
         dataBaru.setHasil(hasilTambah);
-        repository.save(dataBaru);
+        repo.save(dataBaru);
 
         return "redirect:/";
     }
