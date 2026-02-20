@@ -6,11 +6,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
-//test
+/**
+ * Entity representing a kalkulasi result.
+ */
 @Entity
 @Data
 public class Kalkulasi {
 
+    /**
+     * Primary key identifier.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -19,14 +19,21 @@ public final class KalkulasiController {
     }
 
     @GetMapping("/")
-    public String tampilkanHalamanUtama(Model model) {
-        // Ambil semua data riwayat dari database, lalu lempar ke file HTML
+    public String tampilkanHalamanUtama(final Model model) {
+        /**
+         * Ambil semua data riwayat dari database, lalu lempar ke file HTML
+        */
         model.addAttribute("riwayatKalkulasi", repo.findAll());
-        return "index"; // Akan mencari file bernama "index.html"
+        return "index"; /**
+         * Akan mencari file bernama "index.html"
+        */
     }
 
     @PostMapping("/hitung")
-    public String lakukanPerhitungan(@RequestParam int angka1, @RequestParam int angka2) {
+    public String lakukanPerhitungan(
+        @RequestParam int angka1, 
+        @RequestParam int angka2
+    ) {
         int hasilTambah = angka1 + angka2;
 
         Kalkulasi dataBaru = new Kalkulasi();
