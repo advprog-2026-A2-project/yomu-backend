@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Uji Coba Integrasi</title>
+</head>
+<body>
+<h1>Kalkulator Penjumlahan Sederhana</h1>
+
+<form action="/hitung" method="post">
+    <input type="number" name="angka1" placeholder="Angka 1" required>
+    +
+    <input type="number" name="angka2" placeholder="Angka 2" required>
+    <button type="submit">Hitung & Simpan!</button>
+</form>
+
+<br><hr>
+
+<h2>Riwayat Database:</h2>
+<p th:if="${#lists.isEmpty(riwayatKalkulasi)}">Belum ada riwayat perhitungan di database.</p>
+
+<ul>
+    <li th:each="data : ${riwayatKalkulasi}">
+        <span th:text="${data.angkaPertama}"></span> +
+        <span th:text="${data.angkaKedua}"></span> =
+        <strong th:text="${data.hasil}"></strong>
+    </li>
+</ul>
+</body>
+</html>
