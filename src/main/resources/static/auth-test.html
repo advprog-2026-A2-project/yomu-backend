@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Test</title>
+</head>
+<body>
+
+<h2>Register</h2>
+<form id="registerForm">
+  <input type="text" id="regUsername" placeholder="Username" required><br>
+  <input type="text" id="regDisplayName" placeholder="Display Name" required><br>
+  <input type="email" id="regEmail" placeholder="Email"><br>
+  <input type="text" id="regPhone" placeholder="Phone Number"><br>
+  <input type="password" id="regPassword" placeholder="Password" required><br>
+  <button type="submit">Register</button>
+</form>
+
+<p id="registerResult"></p>
+
+<hr>
+
+<h2>Login</h2>
+<form id="loginForm">
+  <input type="text" id="loginIdentifier" placeholder="Username / Email / Phone" required><br>
+  <input type="password" id="loginPassword" placeholder="Password" required><br>
+  <button type="submit">Login</button>
+</form>
+
+<p id="loginResult"></p>
+
+<script>
+  document.getElementById("registerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+      username: document.getElementById("regUsername").value,
+      displayName: document.getElementById("regDisplayName").value,
+      email: document.getElementById("regEmail").value || null,
+      phoneNumber: document.getElementById("regPhone").value || null,
+      password: document.getElementById("regPassword").value
+    };
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const text = await res.text();
+    document.getElementById("registerResult").innerText = text;
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+      identifier: document.getElementById("loginIdentifier").value,
+      password: document.getElementById("loginPassword").value
+    };
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const text = await res.text();
+    document.getElementById("loginResult").innerText = text;
+  });
+</script>
+
+</body>
+</html>
