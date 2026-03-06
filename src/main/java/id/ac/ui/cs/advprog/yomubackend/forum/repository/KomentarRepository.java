@@ -17,5 +17,6 @@ public interface KomentarRepository extends JpaRepository<Komentar, Long> {
      * @param bacaanId ID dari bacaan terkait
      * @return List komentar utama yang diurutkan berdasarkan waktu pembuatan
      */
-    List<Komentar> findByBacaanIdAndParentIsNullOrderByCreatedAtAsc(Long bacaanId);
+    List<Komentar> findByBacaanIdAndParentIsNullOrderByCreatedAtAsc(
+            Long bacaanId);
 }
