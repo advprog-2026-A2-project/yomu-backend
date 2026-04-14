@@ -49,10 +49,10 @@ public class AuthServiceImpl implements AuthService {
         final User user = userRepository.findByUsername(request.getIdentifier())
                 .or(() -> userRepository.findByEmail(request.getIdentifier()))
                 .or(() -> userRepository.findByPhoneNumber(request.getIdentifier()))
-                .orElseThrow(() -> new IllegalArgumentException("Akun tidak ditemukan"));
+                .orElseThrow(() -> new IllegalArgumentException("Akun tidak ditemukan atau password salah"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Password salah");
+            throw new IllegalArgumentException("Akun tidak ditemukan atau password salah");
         }
 
         return new AuthResponse(user.getId(), user.getUsername(), user.getRole(), "Login berhasil");
