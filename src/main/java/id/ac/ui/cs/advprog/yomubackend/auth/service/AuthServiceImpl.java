@@ -7,7 +7,11 @@ import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -57,4 +61,5 @@ public class AuthServiceImpl implements AuthService {
 
         return new AuthResponse(user.getId(), user.getUsername(), user.getRole(), "Login berhasil");
     }
+
 }
