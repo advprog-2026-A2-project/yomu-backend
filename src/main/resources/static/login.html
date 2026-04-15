@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Test</title>
+</head>
+<body>
+
+
+<h2>Login</h2>
+<form id="loginForm">
+  <input type="text" id="loginIdentifier" placeholder="Username / Email / Phone" required><br>
+  <input type="password" id="loginPassword" placeholder="Password" required><br>
+  <button type="submit" id="loginBtn">Login</button>
+</form>
+
+<p id="loginResult"></p>
+
+<p>Don't have an account? <a href="/register.html">Register</a></p>
+
+
+<script>
+
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const loginBtn = document.getElementById("loginBtn");
+    const loginResult = document.getElementById("loginResult");
+    const identifier = document.getElementById("loginIdentifier").value;
+    const password = document.getElementById("loginPassword").value;
+
+    // Men-set State loading
+    loginBtn.disabled = true;
+    loginBtn.classList.add("loading");
+    loginBtn.innerText = "Loading...";
+    loginResult.className = "";
+    loginResult.innerText = "";
+
+    try {
+      const data = {
+        identifier: identifier,
+        password: password
+      };
+
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+
+      // Menangani status respons
+      if (res.ok) {
+        loginResult.className = "success";
+        loginResult.innerText = "Login berhasil! Redirecting...";
+        // Opsional: me-redirect setelah 1,5 detik
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
+      } else {
+        loginResult.className = "error";
+        loginResult.innerText = "Login gagal: " + text;
+      }
+    } catch (error) {
+      loginResult.className = "error";
+      loginResult.innerText = "Error: " + error.message;
+    } finally {
+      // State tombol reset
+      loginBtn.disabled = false;
+      loginBtn.classList.remove("loading");
+      loginBtn.innerText = "Login";
+    }
+  });
+</script>
+
+</body>
+</html>
