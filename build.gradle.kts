@@ -2,7 +2,6 @@ plugins {
     java
     jacoco
     pmd
-    checkstyle
     id("org.springframework.boot") version "3.5.11"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -28,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.google.api-client:google-api-client:2.2.0")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
