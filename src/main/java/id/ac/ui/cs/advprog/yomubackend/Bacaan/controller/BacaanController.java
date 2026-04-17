@@ -55,8 +55,8 @@ public class BacaanController {
         boolean sudahDikerjakan = false;
         if (principal != null) {
             String username = principal.getName();
-            sudahDikerjakan = riwayatKuisRepository.existsByUsernameAndBacaanId(
-                    username, id);
+            sudahDikerjakan = riwayatKuisRepository
+                    .existsByUsernameAndBacaanId(username, id);
             if (sudahDikerjakan) {
                 RiwayatKuis riwayat = riwayatKuisRepository
                         .findByUsernameAndBacaanId(username, id);
@@ -68,7 +68,7 @@ public class BacaanController {
     }
 
     /**
-     * Menampilkan kuis untuk bacaan tertentu.
+     * Menampilkan halaman kuis untuk bacaan tertentu.
      * @param id ID bacaan.
      * @param model Model.
      * @param principal Data user.
