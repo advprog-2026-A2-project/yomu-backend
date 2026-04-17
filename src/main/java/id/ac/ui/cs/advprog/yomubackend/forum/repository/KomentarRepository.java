@@ -20,3 +20,4 @@ public interface KomentarRepository extends JpaRepository<Komentar, Long> {
     List<Komentar> findByBacaanIdAndParentIsNullOrderByCreatedAtAsc(
             Long bacaanId);
 }
+
