@@ -14,6 +14,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entitas yang merepresentasikan reaksi (emoji/upvote/downvote) pada
+ * komentar.
+ */
 @Entity
 @Table(name = "reaksi_komentar")
 @Getter
@@ -21,18 +25,23 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Reaksi {
 
+    /** ID unik reaksi. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** ID pelajar yang memberikan reaksi. */
     @Column(nullable = false)
     private String pelajarId;
 
+    /** Jenis reaksi (UPVOTE, DOWNVOTE, atau emoji). */
     @Column(nullable = false)
-    private String jenisReaksi; // Akan berisi "UPVOTE", "DOWNVOTE", atau Emoji ("🔥", dll)
+    private String jenisReaksi;
 
+    /** Komentar yang direaksi. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "komentar_id", nullable = false)
-    @JsonIgnore // Mencegah infinite loop saat diubah ke JSON
+    @JsonIgnore
     private Komentar komentar;
 }
+

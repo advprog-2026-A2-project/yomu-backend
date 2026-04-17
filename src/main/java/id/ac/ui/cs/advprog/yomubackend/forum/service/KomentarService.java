@@ -43,5 +43,14 @@ public interface KomentarService {
      */
     List<Komentar> getKomentarUtamaByBacaanId(Long bacaanId);
 
-    void toggleReaksi(Long komentarId, String pelajarId, String jenisReaksi);
+    /**
+     * Menambah atau menghapus reaksi pada komentar.
+     *
+     * @param komentarId ID komentar yang direaksi.
+     * @param pelajarId ID pelajar yang memberikan reaksi.
+     * @param jenisReaksi jenis reaksi yang diberikan.
+     */
+    void toggleReaksi(Long komentarId, String pelajarId,
+            String jenisReaksi);
 }
+
