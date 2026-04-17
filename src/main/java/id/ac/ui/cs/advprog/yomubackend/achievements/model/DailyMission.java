@@ -60,10 +60,7 @@ public class DailyMission {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // ----------------------------------------------------------------
-    // Domain Behaviour
-    // ----------------------------------------------------------------
-
+    /** Update DailyMission oleh Admin */
     public void updateDetails(String name, String description, int rewardXp,
                               MissionRequirementType requirementType,
                               int requirementTargetValue, String requirementCategory) {
