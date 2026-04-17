@@ -45,13 +45,14 @@ public final class AuthController {
     private final UserRepository userRepository;
 
     /** Verifier used to validate Google OAuth ID tokens. */
+    private static final String GOOGLE_CLIENT_ID =
+            "246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues"
+                    + ".apps.googleusercontent.com";
+
     private final GoogleIdTokenVerifier verifier =
             new GoogleIdTokenVerifier.Builder(
                     new NetHttpTransport(), new GsonFactory())
-                    .setAudience(
-                            Collections.singletonList(
-                                    "246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues"
-                                    + ".apps.googleusercontent.com"))
+                    .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
                     .build();
 
     /**
