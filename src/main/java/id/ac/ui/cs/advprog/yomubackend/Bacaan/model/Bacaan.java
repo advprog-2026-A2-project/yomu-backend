@@ -14,14 +14,16 @@ import lombok.Setter;
 @Entity
 @Table(name = "bacaan")
 public class Bacaan {
-
+    /** ID dari bacaan. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Judul bacaan. */
     @Column(nullable = false)
     private String judul;
 
+    /** Konten teks bacaan. */
     @Column(columnDefinition = "TEXT", nullable = false)
     private String konten;
 }

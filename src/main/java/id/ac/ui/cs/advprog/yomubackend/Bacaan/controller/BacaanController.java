@@ -48,7 +48,8 @@ public class BacaanController {
      * @return String nama view.
      */
     @GetMapping("/bacaan/{id}")
-    public String bacaTeks(@PathVariable final Long id, final Model model,
+    public String bacaTeks(@PathVariable final Long id,
+                           final Model model,
                            final Principal principal) {
         Bacaan bacaan = bacaanRepository.findById(id).orElseThrow();
         model.addAttribute("bacaan", bacaan);
