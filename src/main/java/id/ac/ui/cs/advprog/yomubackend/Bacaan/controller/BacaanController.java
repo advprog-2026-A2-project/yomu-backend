@@ -3,12 +3,15 @@ package id.ac.ui.cs.advprog.yomubackend.Bacaan.controller;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Bacaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Pertanyaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.RiwayatKuis;
+
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.BacaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.PertanyaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.RiwayatKuisRepository;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +33,7 @@ public class BacaanController {
 
     /**
      * Menampilkan daftar semua bacaan.
+     *
      * @param model Model untuk view.
      * @return String nama view.
      */
@@ -107,14 +111,15 @@ public class BacaanController {
             @RequestParam final Map<String, String> semuaJawaban,
             final Model model,
             final Principal principal) {
-
         int jumlahBenar = 0;
         int totalSoal = 0;
-        List<Pertanyaan> soalList = pertanyaanRepository.findByBacaanId(bacaanId);
+        List<Pertanyaan> soalList =
+                pertanyaanRepository.findByBacaanId(bacaanId);
 
         for (Pertanyaan soal : soalList) {
             totalSoal++;
-            String jawabanUser = semuaJawaban.get("jawaban_" + soal.getId());
+            String k = "jawaban_" + soal.getId();
+            String jawabanUser = semuaJawaban.get(k);
             boolean isBenar = jawabanUser != null
                     && jawabanUser.equals(soal.getKunciJawaban());
             if (isBenar) {
@@ -123,7 +128,8 @@ public class BacaanController {
         }
 
         final int seratus = 100;
-        int nilaiAkhir = (totalSoal == 0) ? 0 : (jumlahBenar * seratus) / totalSoal;
+        int nilaiAkhir = (totalSoal == 0)
+                ? 0 : (jumlahBenar * seratus) / totalSoal;
 
         if (principal != null) {
             String username = principal.getName();
@@ -133,9 +139,8 @@ public class BacaanController {
             if (!isExist) {
                 RiwayatKuis riwayatBaru = new RiwayatKuis();
                 riwayatBaru.setUsername(username);
-                Bacaan bacaanTerkait = bacaanRepository.findById(bacaanId)
-                        .orElseThrow();
-                riwayatBaru.setBacaan(bacaanTerkait);
+                Bacaan bc = bacaanRepository.findById(bacaanId).orElseThrow();
+                riwayatBaru.setBacaan(bc);
                 riwayatBaru.setNilai(nilaiAkhir);
                 riwayatKuisRepository.save(riwayatBaru);
             }
