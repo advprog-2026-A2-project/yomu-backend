@@ -16,7 +16,7 @@ public class KomentarRequest {
     /**
      * ID pelajar yang mengirimkan komentar.
      */
-    private Long pelajarId;
+    private String pelajarId;
 
     /**
      * Isi teks komentar.

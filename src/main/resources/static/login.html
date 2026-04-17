@@ -5,33 +5,30 @@
 </head>
 <body>
 
-
 <h2>Login</h2>
-<form id="loginForm">
-  <input type="text" id="loginIdentifier" placeholder="Username / Email / Phone" required><br>
-  <input type="password" id="loginPassword" placeholder="Password" required><br>
-  <button type="submit" id="loginBtn">Login</button>
+<form id="login-form">
+  <input type="text" id="login-identifier" placeholder="Username / Email / Phone" required><br>
+  <input type="password" id="login-password" placeholder="Password" required><br>
+  <button type="submit" id="login-btn">Login</button>
 </form>
 
-<p id="loginResult"></p>
+<p id="login-result"></p>
 
-<div id="googleSignInButton"></div>
+<div id="google-sign-in-button"></div>
 
 <p>Don't have an account? <a href="/register.html">Register</a></p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
 <script src="js/GoogleSignInManager.js"></script>
 
 <script>
-
-  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    const loginBtn = document.getElementById("loginBtn");
-    const loginResult = document.getElementById("loginResult");
-    const identifier = document.getElementById("loginIdentifier").value;
-    const password = document.getElementById("loginPassword").value;
+    const loginBtn = document.getElementById("login-btn");
+    const loginResult = document.getElementById("login-result");
+    const identifier = document.getElementById("login-identifier").value;
+    const password = document.getElementById("login-password").value;
 
     // Men-set State loading
     loginBtn.disabled = true;
@@ -61,9 +58,9 @@
         console.log('Login success:', res.status);
         loginResult.className = "success";
         loginResult.innerText = "Login berhasil! Redirecting...";
-        // Redirect ke index.html secara eksplisit
+        // Redirect ke root
         setTimeout(() => {
-          window.location.replace("/index.html");
+          window.location.replace("/");
         }, 1500);
       } else {
         console.error('Login failed:', res.status, text);
@@ -84,12 +81,12 @@
 
 <script>
   new GoogleSignInManager()
-    .ElementID('googleSignInButton')
-    .ClientID('246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues.apps.googleusercontent.com')
-    .CheckTokenURL('/api/auth/google')
-    .SuccessURL('/')
-    .FailURL('/login.html')
-    .AutoPrompt(false);
+          .ElementID('google-sign-in-button')
+          .ClientID('246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues.apps.googleusercontent.com')
+          .CheckTokenURL('/api/auth/google')
+          .SuccessURL('/')
+          .FailURL('/login.html')
+          .AutoPrompt(false);
 </script>
 
 </body>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${bacaan.judul}">Bacaan Detail - Yomu</title>
+    <style>
+        /* Gaya Forum Diskusi */
+        .forum-container { margin-top: 50px; border-top: 2px solid #eee; padding-top: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .comment-box { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: #fdfdfd; }
+        .comment-header { font-size: 0.85em; color: #666; margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+        .comment-body { margin-bottom: 10px; line-height: 1.5; }
+        .comment-actions button { margin-right: 10px; padding: 4px 10px; cursor: pointer; border: 1px solid #ccc; background: white; border-radius: 4px; font-size: 0.8em; }
+        .comment-actions button:hover { background-color: #f0f0f0; }
+        .reply-container { margin-left: 30px; margin-top: 10px; border-left: 3px solid #eee; padding-left: 15px; }
+        .form-area { margin-bottom: 30px; background: #f4f7f6; padding: 15px; border-radius: 8px; }
+        textarea { width: 100%; min-height: 80px; padding: 10px; border-radius: 4px; border: 1px solid #ccc; resize: vertical; margin-bottom: 10px; }
+        .hidden { display: none; }
+        .btn-primary { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-success { padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .reaction-bar { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .react-btn { background: #f0f2f5; border: 1px solid #ccc; border-radius: 20px; padding: 4px 10px; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
+        .react-btn:hover { background: #e4e6eb; }
+        .react-btn.active { background: #e7f3ff; border-color: #007bff; color: #007bff; font-weight: bold; }
+    </style>
+</head>
+<body style="max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333;">
+
+<a href="/" style="text-decoration: none; color: #007bff;">⬅ Kembali ke Daftar Misi</a>
+<hr>
+
+<h1 th:text="${bacaan.judul}">Judul Teks</h1>
+<p th:text="${bacaan.konten}" style="font-size: 1.1em; line-height: 1.8; text-align: justify;">Isi teks akan muncul di sini...</p>
+
+<br>
+
+<div th:if="${!sudahDikerjakan}">
+    <a th:href="@{/bacaan/{id}/kuis(id=${bacaan.id})}" class="btn-primary">
+        Mulai Kerjakan Kuis!
+    </a>
+</div>
+<div th:if="${sudahDikerjakan}" style="padding: 15px; background-color: #e9ecef; border-radius: 5px;">
+    <p>✅ Anda sudah menyelesaikan kuis untuk bacaan ini.</p>
+    <p>Nilai Anda: <strong><span th:text="${nilaiSebelumnya}">0</span> / 100</strong></p>
+</div>
+
+<div class="forum-container">
+    <h2>Forum Diskusi</h2>
+
+    <div sec:authorize="isAuthenticated()" class="form-area">
+        <textarea id="main-comment-input" placeholder="Tulis komentar atau pertanyaanmu tentang bacaan ini..."></textarea>
+        <button class="btn-success" onclick="submitComment(null)">Kirim Komentar</button>
+    </div>
+    <div sec:authorize="isAnonymous()">
+        <p style="background-color: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeeba;">
+            Silakan <a href="/login.html">Login</a> untuk ikut berdiskusi.
+        </p>
+    </div>
+
+    <div id="comments-list">
+        <p><i>Memuat diskusi...</i></p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const BACAAN_ID = /*[[${bacaan.id}]]*/ 0;
+    let CURRENT_USER_ID = null;
+
+    // Inisialisasi: Ambil data user dari Auth mandiri, lalu muat komentar
+    async function init() {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const user = await res.json();
+                CURRENT_USER_ID = user.id;
+            }
+        } catch(e) { console.error("Gagal mendapatkan data user login."); }
+        loadComments();
+    }
+
+    async function loadComments() {
+        try {
+            const res = await fetch(`/api/forum/komentar/bacaan/${BACAAN_ID}`);
+            const comments = await res.json();
+            const list = document.getElementById("comments-list");
+            list.innerHTML = comments.length ? "" : "<p>Belum ada diskusi. Jadilah yang pertama!</p>";
+            comments.forEach(c => list.appendChild(renderComment(c)));
+        } catch(e) { console.error("Gagal memuat diskusi."); }
+    }
+
+    function renderComment(c) {
+        const div = document.createElement("div");
+        div.className = "comment-box";
+        const isOwner = c.pelajarId === CURRENT_USER_ID;
+
+        // Proses Data Reaksi
+        const reactions = c.daftarReaksi || [];
+        const upvotes = reactions.filter(r => r.jenisReaksi === 'UPVOTE');
+        const downvotes = reactions.filter(r => r.jenisReaksi === 'DOWNVOTE');
+
+        const hasUpvoted = upvotes.some(r => r.pelajarId === CURRENT_USER_ID);
+        const hasDownvoted = downvotes.some(r => r.pelajarId === CURRENT_USER_ID);
+
+        // Render Emoji Reactions
+        const emojis = ['🔥', '🚀', '😂', '🎉', '🧐'];
+        let emojiHtml = '';
+        emojis.forEach(e => {
+            const reacts = reactions.filter(r => r.jenisReaksi === e);
+            const hasReacted = reacts.some(r => r.pelajarId === CURRENT_USER_ID);
+            // Hanya tampilkan jika ada yang bereaksi, atau user login (bisa diklik)
+            if (reacts.length > 0 || CURRENT_USER_ID) {
+                emojiHtml += `<button class="react-btn ${hasReacted ? 'active' : ''}" onclick="toggleReact(${c.id}, '${e}')">${e} ${reacts.length > 0 ? reacts.length : ''}</button>`;
+            }
+        });
+
+        div.innerHTML = `
+            <div class="comment-header">
+                <strong>Pelajar #${c.pelajarId.substring(0,8)}</strong> |
+                <small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>
+            </div>
+            <div class="comment-body" id="text-${c.id}">${c.isi}</div>
+
+            <div class="reaction-bar">
+                ${CURRENT_USER_ID || upvotes.length > 0 ? `<button class="react-btn ${hasUpvoted ? 'active' : ''}" onclick="toggleReact(${c.id}, 'UPVOTE')">👍 ${upvotes.length}</button>` : ''}
+                ${CURRENT_USER_ID || downvotes.length > 0 ? `<button class="react-btn ${hasDownvoted ? 'active' : ''}" onclick="toggleReact(${c.id}, 'DOWNVOTE')">👎 ${downvotes.length}</button>` : ''}
+                ${emojiHtml}
+            </div>
+
+            <div class="comment-actions" style="margin-top:10px;">
+                ${CURRENT_USER_ID ? `<button onclick="toggleReply(${c.id})">Balas</button>` : ''}
+                ${isOwner ? `<button onclick="editComment(${c.id})">Edit</button>` : ''}
+                ${isOwner ? `<button onclick="deleteComment(${c.id})" style="color:red; border-color:#ffcccc;">Hapus</button>` : ''}
+            </div>
+
+            <div id="reply-form-${c.id}" class="hidden" style="margin-top: 15px;">
+                <textarea id="input-${c.id}" placeholder="Tulis balasan..."></textarea>
+                <button class="btn-success" onclick="submitComment(${c.id})">Kirim Balasan</button>
+                <button onclick="toggleReply(${c.id})">Batal</button>
+            </div>
+            <div class="reply-container" id="replies-${c.id}"></div>
+        `;
+
+        if (c.balasan && c.balasan.length > 0) {
+            const replyList = div.querySelector(`#replies-${c.id}`);
+            c.balasan.forEach(reply => replyList.appendChild(renderComment(reply)));
+        }
+        return div;
+    }
+
+    async function submitComment(parentId) {
+        const input = parentId ? document.getElementById(`input-${parentId}`) : document.getElementById("main-comment-input");
+        const val = input.value.trim();
+        if (!val) return alert("Komentar tidak boleh kosong.");
+
+        try {
+            const res = await fetch("/api/forum/komentar", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ bacaanId: BACAAN_ID, isi: val, parentId: parentId })
+            });
+
+            if (res.ok) {
+                input.value = "";
+                loadComments();
+            } else {
+                // Baca pesan error yang dikirim oleh backend
+                const errorText = await res.text();
+                alert("Pesan Server: " + errorText);
+                console.error(errorText);
+            }
+        } catch (error) {
+            alert("Gagal terhubung ke server. Periksa koneksi internetmu.");
+            console.error(error);
+        }
+    }
+
+    async function editComment(id) {
+        const current = document.getElementById(`text-${id}`).innerText;
+        const baru = prompt("Edit komentar Anda:", current);
+        if (!baru || baru === current) return;
+
+        const res = await fetch(`/api/forum/komentar/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ isi: baru })
+        });
+
+        if (res.ok) loadComments();
+    }
+
+    async function deleteComment(id) {
+        if (!confirm("Hapus komentar ini? Balasan di bawahnya juga akan hilang.")) return;
+        const res = await fetch(`/api/forum/komentar/${id}`, { method: "DELETE" });
+        if (res.ok) loadComments();
+    }
+
+    function toggleReply(id) {
+        document.getElementById(`reply-form-${id}`).classList.toggle('hidden');
+    }
+
+    async function toggleReact(komentarId, jenis) {
+        if (!CURRENT_USER_ID) return alert("Silakan login untuk memberikan reaksi.");
+        try {
+            const res = await fetch(`/api/forum/komentar/${komentarId}/reaksi`, {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ jenisReaksi: jenis })
+            });
+
+            if (res.ok) {
+                loadComments(); // Refresh UI langsung
+            } else {
+                const err = await res.text();
+                alert("Pesan Server: " + err);
+            }
+        } catch(e) { console.error("Error toggle reaction:", e); }
+    }
+
+    init();
+</script>
+</body>
+</html>
