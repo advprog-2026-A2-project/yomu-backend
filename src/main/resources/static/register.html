@@ -155,13 +155,13 @@
       const result = await res.json();
 
       if (res.ok && result.status === "success") {
-        showPesan("green", "✅ Registrasi berhasil! Mengalihkan ke halaman Login...");
+        showPesan("green", "Registrasi berhasil! Mengalihkan ke halaman Login...");
         setTimeout(() => {
           window.location.href = "/login.html";
         }, 2000);
       } else {
         const errorMsg = result.message || result.error || "Registrasi gagal.";
-        showPesan("red", "❌ Error: " + errorMsg);
+        showPesan("red", "Error: " + errorMsg);
       }
     } catch (error) {
       console.error("Fetch error:", error);
