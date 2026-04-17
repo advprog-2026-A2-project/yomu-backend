@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Yomu</title>
+</head>
+<body>
+<div sec:authorize="isAuthenticated()">
+    <form method="post" action="/api/auth/logout" style="display:inline;">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+<div sec:authorize="isAnonymous()">
+    <a href="login.html"><button>Login</button></a>
+</div>
+
+<h2>Daftar Misi Bacaan:</h2>
+
+<div th:if="${#lists.isEmpty(daftarBacaan)}">
+    <p>Belum ada bacaan yang tersedia saat ini.</p>
+</div>
+
+<ul>
+    <li th:each="bacaan : ${daftarBacaan}">
+
+        <a th:href="@{/bacaan/{id}(id=${bacaan.id})}" th:text="${bacaan.judul}">Judul Bacaan</a>
+    </li>
+</ul>
+
+</body>
+</html>

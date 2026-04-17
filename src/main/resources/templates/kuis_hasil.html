@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hasil Kuis</title>
+</head>
+<body style="text-align: center; margin-top: 50px;">
+
+<h1>🎉 Kuis Selesai! 🎉</h1>
+
+<h2>Nilai Kamu: <span th:text="${nilai}" style="color: blue; font-size: 40px;"></span> / 100</h2>
+
+<p>Kamu menjawab benar <b><span th:text="${benar}"></span></b> dari <b><span th:text="${total}"></span></b> pertanyaan.</p>
+
+<br><br>
+<a href="/">
+    <button style="padding: 10px 20px; background-color: gray; color: white;">Kembali ke Halaman Utama</button>
+</a>
+
+</body>
+</html>
