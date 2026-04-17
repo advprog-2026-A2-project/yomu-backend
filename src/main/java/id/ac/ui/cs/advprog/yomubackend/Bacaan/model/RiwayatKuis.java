@@ -1,25 +1,37 @@
 package id.ac.ui.cs.advprog.yomubackend.Bacaan.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+/** Model untuk menyimpan riwayat kuis user. */
 @Getter
 @Setter
 @Entity
 @Table(name = "riwayat_kuis")
 public class RiwayatKuis {
 
+    /** ID unik riwayat. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Username user. */
     @Column(nullable = false)
-    private String username; // Menyimpan nama user/email yang lagi login
+    private String username;
 
+    /** Bacaan terkait. */
     @ManyToOne
     @JoinColumn(name = "bacaan_id", nullable = false)
-    private Bacaan bacaan; // Menyimpan kuis apa yang dikerjain
+    private Bacaan bacaan;
 
-    private int nilai; // Nyatet nilainya juga sekalian
+    /** Nilai yang diperoleh. */
+    private int nilai;
 }
