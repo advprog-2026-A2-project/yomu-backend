@@ -21,18 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class BacaanController {
 
-    /** Repository untuk Bacaan. */
+    /** Repository bacaan. */
     @Autowired private BacaanRepository bacaanRepository;
-    /** Repository untuk Pertanyaan. */
+    /** Repository pertanyaan. */
     @Autowired private PertanyaanRepository pertanyaanRepository;
-    /** Repository untuk RiwayatKuis. */
+    /** Repository riwayat. */
     @Autowired private RiwayatKuisRepository riwayatKuisRepository;
 
-    /**
-     * Menampilkan daftar semua bacaan.
-     * @param model Model untuk view.
-     * @return String nama view.
-     */
+    /** Menampilkan daftar bacaan. */
     @GetMapping("/")
     public String tampilkanDaftarBacaan(final Model model) {
         List<Bacaan> daftarBacaan = bacaanRepository.findAll();
@@ -40,26 +36,20 @@ public class BacaanController {
         return "index";
     }
 
-    /**
-     * Menampilkan detail teks berdasarkan ID.
-     * @param id ID bacaan.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
+    /** Menampilkan detail teks. */
     @GetMapping("/bacaan/{id}")
-    public String bacaTeks(@PathVariable final Long id,
-                           final Model model,
+    public String bacaTeks(@PathVariable final Long id, final Model model,
                            final Principal principal) {
         Bacaan bacaan = bacaanRepository.findById(id).orElseThrow();
         model.addAttribute("bacaan", bacaan);
-
         boolean sudahDikerjakan = false;
         if (principal != null) {
             String username = principal.getName();
-            sudahDikerjakan = riwayatKuisRepository.existsByUsernameAndBacaanId(username, id);
+            sudahDikerjakan = riwayatKuisRepository.existsByUsernameAndBacaanId(
+                    username, id);
             if (sudahDikerjakan) {
-                RiwayatKuis riwayat = riwayatKuisRepository.findByUsernameAndBacaanId(username, id);
+                RiwayatKuis riwayat = riwayatKuisRepository
+                        .findByUsernameAndBacaanId(username, id);
                 model.addAttribute("nilaiSebelumnya", riwayat.getNilai());
             }
         }
@@ -67,13 +57,7 @@ public class BacaanController {
         return "bacaan_detail";
     }
 
-    /**
-     * Menampilkan halaman kuis untuk bacaan tertentu.
-     * @param id ID bacaan.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
+    /** Menampilkan halaman kuis. */
     @GetMapping("/bacaan/{id}/kuis")
     public String kerjakanKuis(@PathVariable final Long id, final Model model,
                                final Principal principal) {
@@ -92,14 +76,7 @@ public class BacaanController {
         return "kuis_halaman";
     }
 
-    /**
-     * Memproses jawaban kuis dan menyimpan nilai.
-     * @param bacaanId ID bacaan.
-     * @param semuaJawaban Map jawaban user.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
+    /** Memproses jawaban kuis. */
     @PostMapping("/submit-kuis")
     public String prosesKuis(@RequestParam("bacaanId") final Long bacaanId,
                              @RequestParam final Map<String, String> semuaJawaban,
@@ -116,10 +93,10 @@ public class BacaanController {
         }
         final int seratus = 100;
         int nilaiAkhir = (totalSoal == 0) ? 0 : (jumlahBenar * seratus) / totalSoal;
-
         if (principal != null) {
             String username = principal.getName();
-            if (!riwayatKuisRepository.existsByUsernameAndBacaanId(username, bacaanId)) {
+            if (!riwayatKuisRepository.existsByUsernameAndBacaanId(username,
+                    bacaanId)) {
                 RiwayatKuis riwayatBaru = new RiwayatKuis();
                 riwayatBaru.setUsername(username);
                 riwayatBaru.setBacaan(bacaanRepository.findById(bacaanId).orElseThrow());
@@ -133,4 +110,4 @@ public class BacaanController {
         return "kuis_hasil";
     }
 }
-//test
+// Baris kosong di sini penting!
