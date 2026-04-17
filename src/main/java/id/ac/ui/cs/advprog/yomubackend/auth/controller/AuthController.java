@@ -80,7 +80,8 @@ public final class AuthController {
      * @return authentication response
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody final RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(
+            @RequestBody final RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
@@ -104,8 +105,9 @@ public final class AuthController {
                         .findByEmail(request.getIdentifier()))
                 .or(() -> userRepository
                         .findByPhoneNumber(request.getIdentifier()))
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "User tidak ditemukan"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "User tidak ditemukan"));
 
         authenticateUserAndSaveSession(user, session);
 
