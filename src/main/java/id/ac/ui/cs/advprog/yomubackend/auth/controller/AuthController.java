@@ -44,11 +44,12 @@ public final class AuthController {
     /** Repository used to lookup users. */
     private final UserRepository userRepository;
 
-    /** Verifier used to validate Google OAuth ID tokens. */
+    /** Google OAuth client ID for verification. */
     private static final String GOOGLE_CLIENT_ID =
             "246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues"
                     + ".apps.googleusercontent.com";
 
+    /** Verifier used to validate Google OAuth ID tokens. */
     private final GoogleIdTokenVerifier verifier =
             new GoogleIdTokenVerifier.Builder(
                     new NetHttpTransport(), new GsonFactory())
