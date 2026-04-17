@@ -16,6 +16,7 @@ public class Achievements {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private String id;
 
     @Column(nullable = false)
