@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Profil - Yomu</title>
+</head>
+<body>
+<h2>Pengaturan Akun</h2>
+<<p><a href="/">Kembali ke Home</a></p>
+
+<!-- SECTION 1: UPDATE PROFIL -->
+<fieldset>
+    <legend>Edit Profil</legend>
+    <form id="updateForm" novalidate>
+        <label>Username Baru:</label><br>
+        <input type="text" id="upUsername" placeholder="Biarkan kosong jika tidak ganti"><br><br>
+
+        <label>Display Name Baru:</label><br>
+        <input type="text" id="upDisplayName" placeholder="Biarkan kosong jika tidak ganti"><br><br>
+
+        <label>Password Baru:</label><br>
+        <input type="password" id="upPassword" placeholder="Min 10 char, 1 Kapital, 1 Angka"><br><br>
+
+        <button type="submit">Simpan Perubahan</button>
+    </form>
+    <p id="updateResult"></p>
+</fieldset>
+
+<br>
+
+<!-- SECTION 2: TAMBAH IDENTITAS (EMAIL/HP) -->
+<fieldset>
+    <legend>Tambah Email / Nomor HP (Metode Login Alternatif)</legend>
+    <form id="identityForm">
+        <label>Email Baru:</label><br>
+        <input type="email" id="addEmail" placeholder="contoh@gmail.com"><br><br>
+
+        <label>Nomor HP Baru:</label><br>
+        <input type="text" id="addPhone" placeholder="08123456789"><br><br>
+
+        <button type="submit">Tambah Identitas</button>
+    </form>
+    <p id="identityResult"></p>
+</fieldset>
+
+<br>
+
+<!-- SECTION 3: HAPUS AKUN -->
+<fieldset style="border-color: red;">
+    <legend style="color: red;">Zona Berbahaya</legend>
+    <p>Aksi ini tidak dapat dibatalkan. Semua data kamu akan hilang.</p>
+    <button id="btnDeleteAccount" style="background-color: red; color: white;">Hapus Akun Permanen</button>
+    <p id="deleteResult"></p>
+</fieldset>
+
+<script>
+    // --- LOGIC UPDATE PROFIL ---
+    document.getElementById("updateForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const data = {
+            username: document.getElementById("upUsername").value.trim(),
+            displayName: document.getElementById("upDisplayName").value.trim(),
+            password: document.getElementById("upPassword").value.trim()
+        };
+
+        if (!data.username && !data.displayName && !data.password) {
+            document.getElementById("updateResult").innerText = "Isi minimal satu field!";
+            document.getElementById("updateResult").style.color = "red";
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/user/update-profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (res.ok && result.status === "success") {
+                document.getElementById("updateResult").innerText = "✅ " + result.message;
+                document.getElementById("updateResult").style.color = "green";
+                if (data.username) {
+                    alert("Username diganti, silakan login ulang.");
+                    window.location.href = "/login.html";
+                }
+            } else {
+                document.getElementById("updateResult").innerText = "❌ " + result.message;
+                document.getElementById("updateResult").style.color = "red";
+            }
+        } catch (error) {
+            document.getElementById("updateResult").innerText = "Gagal terhubung ke server.";
+        }
+    });
+
+    // --- LOGIC TAMBAH IDENTITAS ---
+    document.getElementById("identityForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const data = {
+            email: document.getElementById("addEmail").value.trim(),
+            phoneNumber: document.getElementById("addPhone").value.trim()
+        };
+
+        if (!data.email && !data.phoneNumber) {
+            document.getElementById("identityResult").innerText = "Isi email atau nomor HP!";
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/user/add-identity", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.getElementById("identityResult").innerText = result.message;
+            document.getElementById("identityResult").style.color = res.ok ? "green" : "red";
+        } catch (error) {
+            document.getElementById("identityResult").innerText = "Gagal terhubung ke server.";
+        }
+    });
+
+    // --- LOGIC HAPUS AKUN ---
+    document.getElementById("btnDeleteAccount").addEventListener("click", async function() {
+        if (confirm("Apakah kamu yakin ingin menghapus akun ini secara PERMANEN?")) {
+            try {
+                const res = await fetch("/api/user/delete-account", {
+                    method: "DELETE"
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                    alert("Akun berhasil dihapus. Selamat tinggal!");
+                    window.location.href = "/login.html";
+                } else {
+                    document.getElementById("deleteResult").innerText = "❌ " + result.message;
+                }
+            } catch (error) {
+                alert("Gagal menghapus akun.");
+            }
+        }
+    });
+</script>
+</body>
+</html>

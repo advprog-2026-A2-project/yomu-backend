@@ -1,52 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auth Test</title>
+  <title>Register - Yomu</title>
+  <style>
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"] {
+      margin-bottom: 8px;
+      padding: 4px;
+      width: 250px;
+    }
+    /* Style untuk area pilihan metode */
+    .method-selector {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      width: 238px;
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
 
 <h2>Register</h2>
-<form id="registerForm">
-  <input type="text" id="regUsername" placeholder="Username" required><br>
-  <input type="text" id="regDisplayName" placeholder="Display Name" required><br>
-  <input type="email" id="regEmail" placeholder="Email"><br>
-  <input type="text" id="regPhone" placeholder="Phone Number"><br>
-  <input type="password" id="regPassword" placeholder="Password" required><br>
+
+<form id="registerForm" novalidate>
+  <input type="text" id="regUsername" placeholder="Username"><br>
+  <input type="text" id="regDisplayName" placeholder="Display Name"><br>
+
+  <!-- KOTAK PILIHAN METODE -->
+  <div class="method-selector">
+    <label style="margin-right: 15px;">
+      <input type="radio" name="contactMethod" value="email" checked> Email
+    </label>
+    <label>
+      <input type="radio" name="contactMethod" value="phone"> Phone Number
+    </label>
+  </div>
+
+  <!-- INPUT EMAIL (MUNCUL DEFAULT) -->
+  <div id="emailContainer">
+    <input type="email" id="regEmail" placeholder="Email (example: name@gmail.com)"><br>
+  </div>
+
+  <!-- INPUT NOMOR HP (DISEMBUNYIKAN DEFAULT) -->
+  <div id="phoneContainer" style="display: none;">
+    <input type="text" id="regPhone" placeholder="Phone Number" maxlength="15"><br>
+  </div>
+
+  <input type="password" id="regPassword" placeholder="Password"><br>
+
   <button type="submit">Register</button>
 </form>
 
-<p id="registerResult"></p>
+<p id="registerResult" style="font-weight: bold;"></p>
 
-
-<p>Don't have an account? <a href="/login.html">Register</a></p>
-
-
+<p>Already have an account? <a href="/login.html">Login here</a></p>
 
 <script>
+  // ==========================================
+  // LOGIC: GANTI INPUT EMAIL <--> NOMOR HP
+  // ==========================================
+  const radios = document.querySelectorAll('input[name="contactMethod"]');
+  const emailDiv = document.getElementById("emailContainer");
+  const phoneDiv = document.getElementById("phoneContainer");
+  const regEmail = document.getElementById("regEmail");
+  const regPhone = document.getElementById("regPhone");
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'email') {
+        emailDiv.style.display = 'block'; // Munculkan Email
+        phoneDiv.style.display = 'none';  // Sembunyikan HP
+        regPhone.value = '';              // Bersihkan isian HP
+      } else {
+        emailDiv.style.display = 'none';  // Sembunyikan Email
+        phoneDiv.style.display = 'block'; // Munculkan HP
+        regEmail.value = '';              // Bersihkan isian Email
+      }
+    });
+  });
+
+  // ==========================================
+  // AUTO-FORMAT NOMOR HP TIAP 4 ANGKA
+  // ==========================================
+  regPhone.addEventListener("input", function(e) {
+    let val = e.target.value.replace(/\D/g, "");
+    let formatted = val.match(/.{1,4}/g)?.join("-") || val;
+    e.target.value = formatted;
+  });
+
+  // ==========================================
+  // FUNGSI CEK FORMAT EMAIL
+  // ==========================================
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // ==========================================
+  // PROSES SAAT TOMBOL REGISTER DIKLIK
+  // ==========================================
   document.getElementById("registerForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const usernameInput = document.getElementById("regUsername").value.trim();
+    const displayNameInput = document.getElementById("regDisplayName").value.trim();
+    const emailInput = regEmail.value.trim();
+
+    const rawPhoneInput = regPhone.value;
+    const phoneInputDB = rawPhoneInput.replace(/-/g, "");
+
+    const passwordInput = document.getElementById("regPassword").value.trim();
+
+    // Cari tahu user lagi milih metode apa
+    const selectedMethod = document.querySelector('input[name="contactMethod"]:checked').value;
+
+    // === VALIDASI UMUM ===
+    if (!usernameInput) { showPesan("red", "Peringatan: Username tidak boleh kosong!"); return; }
+    if (!displayNameInput) { showPesan("red", "Peringatan: Display Name tidak boleh kosong!"); return; }
+
+    // === VALIDASI BERDASARKAN PILIHAN ===
+    if (selectedMethod === 'email') {
+      if (!emailInput) { showPesan("red", "Peringatan: Email tidak boleh kosong!"); return; }
+      if (!isValidEmail(emailInput)) { showPesan("red", "Peringatan: Format email tidak valid! (cth: user@gmail.com)"); return; }
+    } else { // Jika milih nomor HP
+      if (!phoneInputDB) { showPesan("red", "Peringatan: Nomor HP tidak boleh kosong!"); return; }
+      if (phoneInputDB.length < 10) { showPesan("red", "Peringatan: Nomor HP terlalu pendek!"); return; }
+    }
+
+    // === VALIDASI PASSWORD ===
+    if (!passwordInput) { showPesan("red", "Peringatan: Password tidak boleh kosong!"); return; }
+    if (passwordInput.length < 10) { showPesan("red", "Peringatan: Password minimal harus 10 karakter!"); return; }
+    if (!/[A-Z]/.test(passwordInput)) { showPesan("red", "Peringatan: Password harus ada minimal 1 huruf kapital!"); return; }
+    if (!/[0-9]/.test(passwordInput)) { showPesan("red", "Peringatan: Password harus ada minimal 1 angka!"); return; }
+
+    showPesan("blue", "Loading...");
+
     const data = {
-      username: document.getElementById("regUsername").value,
-      displayName: document.getElementById("regDisplayName").value,
-      email: document.getElementById("regEmail").value || null,
-      phoneNumber: document.getElementById("regPhone").value || null,
-      password: document.getElementById("regPassword").value
+      username: usernameInput,
+      displayName: displayNameInput,
+      email: emailInput || null,
+      phoneNumber: phoneInputDB || null,
+      password: passwordInput
     };
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
 
-    const text = await res.text();
-    document.getElementById("registerResult").innerText = text;
+      const result = await res.json();
+
+      if (res.ok && result.status === "success") {
+        showPesan("green", "Registrasi berhasil! Mengalihkan ke halaman Login...");
+        setTimeout(() => {
+          window.location.href = "/login.html";
+        }, 2000);
+      } else {
+        const errorMsg = result.message || result.error || "Registrasi gagal.";
+        showPesan("red", "Error: " + errorMsg);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      showPesan("red", "Gagal terhubung ke server.");
+    }
   });
 
-
+  function showPesan(warna, teks) {
+    const r = document.getElementById("registerResult");
+    r.style.color = warna;
+    r.innerText = teks;
+  }
 </script>
 
 </body>
