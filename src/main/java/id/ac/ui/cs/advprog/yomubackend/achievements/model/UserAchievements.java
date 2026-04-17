@@ -1,12 +1,24 @@
 package id.ac.ui.cs.advprog.yomubackend.achievements.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * UserAchievement — progress seorang pelajar terhadap satu Achievement.
@@ -61,9 +73,10 @@ public class UserAchievements {
 
     /**
      * Tambah progress. Tandai selesai jika target sudah tercapai.
-     * @return true jika achievement baru saja selesai pada pemanggilan ini
+     * @param amount sebagai progress.
+     * @return true jika achievement baru saja selesai pada pemanggilan ini.
      */
-    public boolean addProgress(int amount) {
+    public boolean addProgress(final int amount) {
         if (this.isCompleted) return false;
 
         this.currentProgress = Math.min(

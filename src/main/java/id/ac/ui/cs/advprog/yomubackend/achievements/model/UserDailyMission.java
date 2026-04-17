@@ -1,7 +1,20 @@
 package id.ac.ui.cs.advprog.yomubackend.achievements.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -36,7 +49,7 @@ public class UserDailyMission {
     @JoinColumn(name = "mission_id", nullable = false)
     private DailyMission mission;
 
-    /** Tanggal misi ini berlaku — direset setiap hari */
+    /** Tanggal misi ini berlaku — direset setiap hari. */
     @Column(nullable = false)
     private LocalDate date;
 
@@ -66,9 +79,10 @@ public class UserDailyMission {
 
     /**
      * Perbarui progress berdasarkan nilai terbaru.
-     * @return true jika misi baru saja selesai pada pemanggilan ini
+     * @param newProgress adalah progress dari user.
+     * @return true jika misi baru saja selesai pada pemanggilan ini.
      */
-    public boolean updateProgress(int newProgress) {
+    public boolean updateProgress(final int newProgress) {
         if (this.isCompleted) return false;
 
         this.currentProgress = Math.min(
