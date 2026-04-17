@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.yomubackend.forum.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,9 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-/**
- * Entitas yang merepresentasikan komentar pada suatu bacaan.
- */
 @Entity
 @Table(name = "komentar")
 @Getter
@@ -29,48 +27,34 @@ import org.hibernate.annotations.CreationTimestamp;
 @NoArgsConstructor
 public class Komentar {
 
-    /**
-     * ID unik komentar.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * ID bacaan yang dikomentari (referensi dari modul lain).
-     */
     @Column(nullable = false)
     private Long bacaanId;
 
-    /**
-     * ID pelajar yang memberikan komentar.
-     */
+    // Pastikan ini sudah String
     @Column(nullable = false)
-    private Long pelajarId;
+    private String pelajarId;
 
-    /**
-     * Isi teks dari komentar.
-     */
     @Column(nullable = false, columnDefinition = "TEXT")
     private String isi;
 
-    /**
-     * Waktu pembuatan komentar.
-     */
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    /**
-     * Referensi ke komentar parent jika merupakan balasan.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnore
     private Komentar parent;
 
-    /**
-     * Daftar balasan untuk komentar ini.
-     */
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Komentar> balasan = new ArrayList<>();
+
+    /**
+     * Daftar reaksi (Upvote/Downvote/Emoji) yang ada pada komentar ini.
+     */
+    @OneToMany(mappedBy = "komentar", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reaksi> daftarReaksi = new ArrayList<>();
 }

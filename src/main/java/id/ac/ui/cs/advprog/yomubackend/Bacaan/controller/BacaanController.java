@@ -3,7 +3,6 @@ package id.ac.ui.cs.advprog.yomubackend.Bacaan.controller;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Bacaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Pertanyaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.RiwayatKuis;
-
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.BacaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.PertanyaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.RiwayatKuisRepository;
@@ -20,23 +19,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/** Controller untuk mengelola bacaan dan kuis. */
 @Controller
 public class BacaanController {
 
-    /** Repository bacaan. */
     @Autowired private BacaanRepository bacaanRepository;
-    /** Repository pertanyaan. */
     @Autowired private PertanyaanRepository pertanyaanRepository;
-    /** Repository riwayat. */
     @Autowired private RiwayatKuisRepository riwayatKuisRepository;
 
-    /**
-     * Menampilkan daftar semua bacaan.
-     *
-     * @param model Model untuk view.
-     * @return String nama view.
-     */
     @GetMapping("/")
     public String tampilkanDaftarBacaan(final Model model) {
         List<Bacaan> daftarBacaan = bacaanRepository.findAll();
@@ -44,27 +33,18 @@ public class BacaanController {
         return "index";
     }
 
-    /**
-     * Menampilkan detail teks berdasarkan ID.
-     * @param id ID bacaan.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
     @GetMapping("/bacaan/{id}")
-    public String bacaTeks(@PathVariable final Long id, final Model model,
-                           final Principal principal) {
+    public String bacaTeks(@PathVariable final Long id, final Model model, final Principal principal) {
         Bacaan bacaan = bacaanRepository.findById(id).orElseThrow();
         model.addAttribute("bacaan", bacaan);
         boolean sudahDikerjakan = false;
 
         if (principal != null) {
             String username = principal.getName();
-            sudahDikerjakan = riwayatKuisRepository
-                    .existsByUsernameAndBacaanId(username, id);
+            sudahDikerjakan = riwayatKuisRepository.existsByUsernameAndBacaanId(username, id);
             if (sudahDikerjakan) {
-                RiwayatKuis riwayat = riwayatKuisRepository
-                        .findByUsernameAndBacaanId(username, id);
+                // Menampilkan nilai sebelumnya jika sudah pernah mengerjakan
+                RiwayatKuis riwayat = riwayatKuisRepository.findByUsernameAndBacaanId(username, id);
                 model.addAttribute("nilaiSebelumnya", riwayat.getNilai());
             }
         }
@@ -72,19 +52,12 @@ public class BacaanController {
         return "bacaan_detail";
     }
 
-    /**
-     * Menampilkan halaman kuis untuk bacaan tertentu.
-     * @param id ID bacaan.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
+    // --- METHOD KUIS YANG KEMBALI DITAMBAHKAN ---
+
     @GetMapping("/bacaan/{id}/kuis")
-    public String kerjakanKuis(@PathVariable final Long id, final Model model,
-                               final Principal principal) {
+    public String kerjakanKuis(@PathVariable final Long id, final Model model, final Principal principal) {
         if (principal != null) {
-            boolean sudahDikerjakan = riwayatKuisRepository
-                    .existsByUsernameAndBacaanId(principal.getName(), id);
+            boolean sudahDikerjakan = riwayatKuisRepository.existsByUsernameAndBacaanId(principal.getName(), id);
             if (sudahDikerjakan) {
                 return "redirect:/bacaan/" + id;
             }
@@ -97,44 +70,33 @@ public class BacaanController {
         return "kuis_halaman";
     }
 
-    /**
-     * Memproses jawaban kuis.
-     * @param bacaanId ID bacaan.
-     * @param semuaJawaban Map jawaban.
-     * @param model Model.
-     * @param principal Data user.
-     * @return String nama view.
-     */
     @PostMapping("/submit-kuis")
     public String prosesKuis(
             @RequestParam("bacaanId") final Long bacaanId,
             @RequestParam final Map<String, String> semuaJawaban,
             final Model model,
             final Principal principal) {
+
         int jumlahBenar = 0;
         int totalSoal = 0;
-        List<Pertanyaan> soalList =
-                pertanyaanRepository.findByBacaanId(bacaanId);
+        List<Pertanyaan> soalList = pertanyaanRepository.findByBacaanId(bacaanId);
 
         for (Pertanyaan soal : soalList) {
             totalSoal++;
             String k = "jawaban_" + soal.getId();
             String jawabanUser = semuaJawaban.get(k);
-            boolean isBenar = jawabanUser != null
-                    && jawabanUser.equals(soal.getKunciJawaban());
+            boolean isBenar = jawabanUser != null && jawabanUser.equals(soal.getKunciJawaban());
             if (isBenar) {
                 jumlahBenar++;
             }
         }
 
         final int seratus = 100;
-        int nilaiAkhir = (totalSoal == 0)
-                ? 0 : (jumlahBenar * seratus) / totalSoal;
+        int nilaiAkhir = (totalSoal == 0) ? 0 : (jumlahBenar * seratus) / totalSoal;
 
         if (principal != null) {
             String username = principal.getName();
-            boolean isExist = riwayatKuisRepository
-                    .existsByUsernameAndBacaanId(username, bacaanId);
+            boolean isExist = riwayatKuisRepository.existsByUsernameAndBacaanId(username, bacaanId);
 
             if (!isExist) {
                 RiwayatKuis riwayatBaru = new RiwayatKuis();

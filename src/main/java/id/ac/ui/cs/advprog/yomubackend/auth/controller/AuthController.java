@@ -11,6 +11,8 @@ import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomubackend.auth.service.AuthService;
 import jakarta.servlet.http.HttpSession;
+
+import java.security.Principal;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,20 @@ public final class AuthController {
                             Collections.singletonList(
                                     "246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues.apps.googleusercontent.com"))
                     .build();
+
+    /**
+     * Mengambil data profil user yang sedang login.
+     * Digunakan oleh Frontend untuk identifikasi mandiri.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser(final Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return userRepository.findByUsername(principal.getName())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     /**
      * Register a new user.
