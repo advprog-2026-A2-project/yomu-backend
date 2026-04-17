@@ -8,12 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-/** Class untuk mengisi data awal (dummy) ke database. */
+/** Class untuk seeding data dummy. */
 @Component
 public class DataSeeder implements CommandLineRunner {
 
-    @Autowired private BacaanRepository bacaanRepository;
-    @Autowired private PertanyaanRepository pertanyaanRepository;
+    /** Repository untuk Bacaan. */
+    @Autowired
+    private BacaanRepository bacaanRepository;
+
+    /** Repository untuk Pertanyaan. */
+    @Autowired
+    private PertanyaanRepository pertanyaanRepository;
 
     /**
      * Menjalankan proses seeding data saat aplikasi pertama kali dijalankan.
@@ -51,4 +56,3 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 }
-// Baris kosong di sini penting untuk Checkstyle!
