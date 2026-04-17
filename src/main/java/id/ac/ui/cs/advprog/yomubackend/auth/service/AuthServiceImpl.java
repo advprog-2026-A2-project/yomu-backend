@@ -66,6 +66,15 @@ public final class AuthServiceImpl implements AuthService {
         user.setRole("PELAJAR");
 
         final User saved = userRepository.save(user);
+        // Cek kalau emailnya adalah email lo, jadikan ADMIN. Sisanya jadikan PELAJAR.
+        if (user.getEmail() != null && user.getEmail().equals("syahrousan@gmail.com")) {
+            user.setRole("ADMIN");
+        } else {
+            user.setRole("PELAJAR"); // Atau "USER", sesuaikan sama default role lo
+        }
+
+        // Baru disave
+        userRepository.save(user);
         return new AuthResponse(
                 "success", saved.getId(), saved.getUsername(), saved.getRole(), "Registrasi berhasil");
     }
