@@ -31,13 +31,16 @@ public class DataSeeder implements CommandLineRunner {
         if (bacaanRepository.count() == 0) {
             final Bacaan teks1 = new Bacaan();
             teks1.setJudul("Sejarah Kemerdekaan Indonesia");
-            teks1.setKonten("Proklamasi Kemerdekaan Indonesia dilaksanakan pada hari Jumat, "
-                    + "17 Agustus 1945 tahun Masehi, atau tanggal 17 Agustus 2605 menurut tahun Jepang. "
-                    + "Teks proklamasi dibacakan oleh Soekarno didampingi Mohammad Hatta.");
+            teks1.setKonten("Proklamasi Kemerdekaan Indonesia dilaksanakan "
+                    + "pada hari Jumat, 17 Agustus 1945 tahun Masehi, atau "
+                    + "tanggal 17 Agustus 2605 menurut tahun Jepang. "
+                    + "Teks proklamasi dibacakan oleh Soekarno didampingi "
+                    + "Mohammad Hatta.");
             bacaanRepository.save(teks1);
 
             final Pertanyaan soal1 = new Pertanyaan();
-            soal1.setSoal("Kapan Proklamasi Kemerdekaan Indonesia dilaksanakan?");
+            soal1.setSoal("Kapan Proklamasi Kemerdekaan Indonesia "
+                    + "dilaksanakan?");
             soal1.setOpsiA("17 Agustus 1945");
             soal1.setOpsiB("18 Agustus 1945");
             soal1.setOpsiC("17 Agustus 2605");
@@ -48,8 +51,8 @@ public class DataSeeder implements CommandLineRunner {
 
             final Bacaan teks2 = new Bacaan();
             teks2.setJudul("Mengenal Hewan Mamalia");
-            teks2.setKonten("Mamalia adalah kelas hewan vertebrata yang dicirikan oleh "
-                    + "adanya kelenjar susu.");
+            teks2.setKonten("Mamalia adalah kelas hewan vertebrata "
+                    + "yang dicirikan oleh adanya kelenjar susu.");
             bacaanRepository.save(teks2);
 
             System.out.println("✅ Data bacaan & Kuis berhasil dimasukkan!");
