@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${bacaan.judul}">Judul Bacaan</title>
+</head>
+<body>
+
+<a href="/">⬅ Kembali ke Daftar Misi</a>
+<hr>
+
+<h1 th:text="${bacaan.judul}">Judul Teks Akan Muncul Disini</h1>
+
+
+<p th:text="${bacaan.konten}" style="font-size: 18px; line-height: 1.6;">
+    Isi teks akan muncul disini...
+</p>
+
+<br><hr>
+
+<a th:href="@{/bacaan/{id}/kuis(id=${bacaan.id})}">
+    <button style="padding: 10px; background-color: blue; color: white;">
+        Mulai Kerjakan Kuis!
+    </button>
+</a>
+
+</body>
+</html>

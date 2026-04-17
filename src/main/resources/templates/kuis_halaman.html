@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kuis - <span th:text="${judulBacaan}"></span></title>
+</head>
+<body>
+
+<h1>Kuis: <span th:text="${judulBacaan}"></span></h1>
+<p style="color: red;"><i>Sesuai aturan: Teks bacaan telah disembunyikan. Silakan kerjakan soal di bawah ini.</i></p>
+<hr>
+
+<form action="/submit-kuis" method="POST">
+    <input type="hidden" name="bacaanId" th:value="${bacaanId}">
+
+    <div th:each="soal, stat : ${daftarSoal}" style="margin-bottom: 20px;">
+        <p><strong><span th:text="${stat.count}"></span>. <span th:text="${soal.soal}"></span></strong></p>
+
+        <input type="radio" th:name="'jawaban_' + ${soal.id}" value="A" required> A. <span th:text="${soal.opsiA}"></span><br>
+        <input type="radio" th:name="'jawaban_' + ${soal.id}" value="B"> B. <span th:text="${soal.opsiB}"></span><br>
+        <input type="radio" th:name="'jawaban_' + ${soal.id}" value="C"> C. <span th:text="${soal.opsiC}"></span><br>
+        <input type="radio" th:name="'jawaban_' + ${soal.id}" value="D"> D. <span th:text="${soal.opsiD}"></span><br>
+    </div>
+
+    <button type="submit" style="padding: 10px; background-color: green; color: white;">Selesai & Kumpulkan!</button>
+</form>
+
+</body>
+</html>
