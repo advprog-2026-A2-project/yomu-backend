@@ -53,6 +53,7 @@ public class BacaanController {
         Bacaan bacaan = bacaanRepository.findById(id).orElseThrow();
         model.addAttribute("bacaan", bacaan);
         boolean sudahDikerjakan = false;
+
         if (principal != null) {
             String username = principal.getName();
             sudahDikerjakan = riwayatKuisRepository
@@ -101,32 +102,45 @@ public class BacaanController {
      * @return String nama view.
      */
     @PostMapping("/submit-kuis")
-    public String prosesKuis(@RequestParam("bacaanId") final Long bacaanId,
-                             @RequestParam final Map<String, String> semuaJawaban,
-                             final Model model, final Principal principal) {
+    public String prosesKuis(
+            @RequestParam("bacaanId") final Long bacaanId,
+            @RequestParam final Map<String, String> semuaJawaban,
+            final Model model,
+            final Principal principal) {
+
         int jumlahBenar = 0;
         int totalSoal = 0;
-        List<Pertanyaan> daftarSoal = pertanyaanRepository.findByBacaanId(bacaanId);
-        for (Pertanyaan soal : daftarSoal) {
+        List<Pertanyaan> soalList = pertanyaanRepository.findByBacaanId(bacaanId);
+
+        for (Pertanyaan soal : soalList) {
             totalSoal++;
             String jawabanUser = semuaJawaban.get("jawaban_" + soal.getId());
-            if (jawabanUser != null && jawabanUser.equals(soal.getKunciJawaban())) {
+            boolean isBenar = jawabanUser != null
+                    && jawabanUser.equals(soal.getKunciJawaban());
+            if (isBenar) {
                 jumlahBenar++;
             }
         }
+
         final int seratus = 100;
         int nilaiAkhir = (totalSoal == 0) ? 0 : (jumlahBenar * seratus) / totalSoal;
+
         if (principal != null) {
             String username = principal.getName();
-            if (!riwayatKuisRepository.existsByUsernameAndBacaanId(username,
-                    bacaanId)) {
+            boolean isExist = riwayatKuisRepository
+                    .existsByUsernameAndBacaanId(username, bacaanId);
+
+            if (!isExist) {
                 RiwayatKuis riwayatBaru = new RiwayatKuis();
                 riwayatBaru.setUsername(username);
-                riwayatBaru.setBacaan(bacaanRepository.findById(bacaanId).orElseThrow());
+                Bacaan bacaanTerkait = bacaanRepository.findById(bacaanId)
+                        .orElseThrow();
+                riwayatBaru.setBacaan(bacaanTerkait);
                 riwayatBaru.setNilai(nilaiAkhir);
                 riwayatKuisRepository.save(riwayatBaru);
             }
         }
+
         model.addAttribute("nilai", nilaiAkhir);
         model.addAttribute("benar", jumlahBenar);
         model.addAttribute("total", totalSoal);

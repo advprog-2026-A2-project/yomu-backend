@@ -7,9 +7,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RiwayatKuisRepository extends JpaRepository<RiwayatKuis, Long> {
 
-    // Fungsi sakti buat ngecek: Apakah ada record dengan username X dan bacaan_id Y?
+    /**
+     * Mengecek apakah ada record dengan username dan bacaan id tertentu.
+     * @param username nama pengguna
+     * @param bacaanId ID dari bacaan
+     * @return boolean true jika sudah ada, false jika belum
+     */
     boolean existsByUsernameAndBacaanId(String username, Long bacaanId);
 
-    // Opsional: Buat ngambil data nilainya kalau mau ditampilin lagi
+    /**
+     * Mengambil data riwayat kuis berdasarkan username dan bacaan id.
+     * @param username nama pengguna
+     * @param bacaanId ID dari bacaan
+     * @return RiwayatKuis data riwayat kuis terkait
+     */
     RiwayatKuis findByUsernameAndBacaanId(String username, Long bacaanId);
 }
