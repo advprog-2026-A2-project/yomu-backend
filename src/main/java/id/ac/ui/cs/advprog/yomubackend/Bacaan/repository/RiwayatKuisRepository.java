@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RiwayatKuisRepository extends JpaRepository<RiwayatKuis, Long> {
+public interface RiwayatKuisRepository extends
+        JpaRepository<RiwayatKuis, Long> {
 
     /**
      * Mengecek apakah ada record dengan username dan bacaan id tertentu.
