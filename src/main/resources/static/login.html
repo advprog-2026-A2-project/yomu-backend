@@ -51,29 +51,24 @@
         body: JSON.stringify(data)
       });
 
-      const text = await res.text();
+      const message = await res.text();
 
-      // Menangani status respons
       if (res.ok) {
-        console.log('Login success:', res.status);
         loginResult.className = "success";
         loginResult.innerText = "Login berhasil! Redirecting...";
-        // Redirect ke root
         setTimeout(() => {
           window.location.replace("/");
         }, 1500);
       } else {
-        console.error('Login failed:', res.status, text);
         loginResult.className = "error";
-        loginResult.innerText = "Login gagal: " + text;
+        loginResult.style.color = "red"; // Biar keliatan merah errornya
+        loginResult.innerText = message;
       }
     } catch (error) {
       loginResult.className = "error";
-      loginResult.innerText = "Error: " + error.message;
+      loginResult.innerText = "Terjadi kesalahan sistem.";
     } finally {
-      // State tombol reset
       loginBtn.disabled = false;
-      loginBtn.classList.remove("loading");
       loginBtn.innerText = "Login";
     }
   });

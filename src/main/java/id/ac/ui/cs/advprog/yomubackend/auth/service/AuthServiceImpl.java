@@ -10,6 +10,8 @@ import id.ac.ui.cs.advprog.yomubackend.auth.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public final class AuthServiceImpl implements AuthService {
 
-    /** Repository used for user lookups and persistence. */
     private final UserRepository userRepository;
-
-    /** Password encoder for secure password storage. */
     private final PasswordEncoder passwordEncoder;
 
-    /** Verifier used to validate Google OAuth ID tokens. */
+    // Daftar Email Admin
+    private final List<String> adminEmails = Arrays.asList(
+            "syahrousan@gmail.com",
+            "mernawatispeed08@gmail.co"
+    );
+
     private final GoogleIdTokenVerifier verifier =
             new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(
@@ -35,12 +39,6 @@ public final class AuthServiceImpl implements AuthService {
                                     "246704411302-hr4q3cb0u300318uvfp7q1b4lbjuvues.apps.googleusercontent.com"))
                     .build();
 
-    /**
-     * Register a new user in the system.
-     *
-     * @param request registration request payload
-     * @return authentication response
-     */
     @Override
     public AuthResponse register(final RegisterRequest request) {
         if (request.getEmail() == null && request.getPhoneNumber() == null) {
@@ -63,19 +61,25 @@ public final class AuthServiceImpl implements AuthService {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setDisplayName(request.getDisplayName());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("PELAJAR");
+
+        // Cek Role Admin sebelum save
+        if (user.getEmail() != null && adminEmails.contains(user.getEmail())) {
+            user.setRole("ADMIN");
+        } else {
+            user.setRole("PELAJAR");
+        }
 
         final User saved = userRepository.save(user);
+
         return new AuthResponse(
-                "success", saved.getId(), saved.getUsername(), saved.getRole(), "Registrasi berhasil");
+                "success",
+                saved.getId(),
+                saved.getUsername(),
+                saved.getRole(),
+                "Registrasi berhasil"
+        );
     }
 
-    /**
-     * Authenticate the user by identifier and password.
-     *
-     * @param request login request payload
-     * @return authentication response
-     */
     @Override
     public AuthResponse login(final LoginRequest request) {
         final User user = userRepository.findByUsername(request.getIdentifier())
@@ -92,12 +96,6 @@ public final class AuthServiceImpl implements AuthService {
                 "success", user.getId(), user.getUsername(), user.getRole(), "Login berhasil");
     }
 
-    /**
-     * Authenticate a user with Google OAuth.
-     *
-     * @param idToken Google ID token
-     * @return authentication response
-     */
     @Override
     public AuthResponse loginWithGoogle(final String idToken) {
         try {
@@ -112,11 +110,18 @@ public final class AuthServiceImpl implements AuthService {
 
             User user = userRepository.findByEmail(email).orElseGet(() -> {
                 User newUser = new User();
-                newUser.setUsername(email); // or generate a unique username
+                newUser.setUsername(email);
                 newUser.setEmail(email);
                 newUser.setDisplayName(name);
-                newUser.setPassword(""); // password kosong untuk OAuth
-                newUser.setRole("PELAJAR");
+                newUser.setPassword("");
+
+                // PENTING: Cek Admin juga pas pertama kali login Google
+                if (email != null && adminEmails.contains(email)) {
+                    newUser.setRole("ADMIN");
+                } else {
+                    newUser.setRole("PELAJAR");
+                }
+
                 return userRepository.save(newUser);
             });
 
