@@ -6,9 +6,20 @@
 </head>
 <body>
 <div sec:authorize="isAuthenticated()">
+    <!-- Ini tombol untuk ke halaman profil -->
+    <a href="/profile.html">
+        <button type="button">Pengaturan Profil</button>
+    </a>
+
     <form method="post" action="/api/auth/logout" style="display:inline;">
         <button type="submit">Logout</button>
     </form>
+</div>
+
+<div sec:authorize="hasRole('ADMIN')" style="margin-top: 10px;">
+    <a href="/admin.html">
+        <button type="button" style="background-color: gold; font-weight: bold;">👑 Dashboard Admin</button>
+    </a>
 </div>
 <div sec:authorize="isAnonymous()">
     <a href="login.html"><button>Login</button></a>

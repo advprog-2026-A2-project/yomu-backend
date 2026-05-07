@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Yomu</title>
+    <style>
+        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        .form-group { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<h1>Dashboard Admin - Kelola Konten</h1>
+<a href="/">Kembali ke Home</a> |
+<form method="post" action="/api/auth/logout" style="display:inline;">
+    <button type="submit">Logout</button>
+</form>
+
+<hr>
+
+<!-- FORM LANGKAH 3: BUAT TEKS -->
+<div class="card">
+    <h3>Buat Bacaan Baru </h3>
+    <div class="form-group">
+        <input type="text" id="judul" placeholder="Judul Bacaan" style="width: 100%;">
+    </div>
+    <div class="form-group">
+        <textarea id="konten" placeholder="Isi Konten Teks..." style="width: 100%; height: 100px;"></textarea>
+    </div>
+    <button onclick="simpanBacaan()">Simpan Bacaan</button>
+</div>
+
+<hr>
+
+<h3>Daftar Bacaan </h3>
+<div id="container-bacaan"></div>
+
+<script>
+    // 1. FUNGSI UNTUK SIMPAN BACAAN BARU (LANGKAH 3)
+    async function simpanBacaan() {
+        const judul = document.getElementById('judul').value;
+        const konten = document.getElementById('konten').value;
+
+        if (!judul || !konten) return alert("Isi judul dan konten dulu!");
+
+        const data = { judul: judul, konten: konten };
+        const res = await fetch('/api/admin/bacaan/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("Bacaan berhasil dibuat!");
+            document.getElementById('judul').value = '';
+            document.getElementById('konten').value = '';
+            loadBacaan(); // Refresh list
+        }
+    }
+
+    // 2. FUNGSI LOAD DATA (TAMPILKAN LIST BACAAN & SOAL)
+    async function loadBacaan() {
+        const res = await fetch('/api/admin/bacaan/list');
+        const data = await res.json();
+        const container = document.getElementById('container-bacaan');
+        container.innerHTML = '';
+
+        for (const b of data) {
+            // Ambil soal untuk bacaan ini
+            const resSoal = await fetch(`/api/admin/bacaan/${b.id}/questions`);
+            const listSoal = await resSoal.json();
+
+            let soalHtml = '<ul>';
+            listSoal.forEach(s => {
+                soalHtml += `
+                    <li style="margin-bottom: 5px;">
+                        ${s.soal} (Kunci: ${s.kunciJawaban})
+                        <button onclick="hapusSoal(${s.id})" style="color:red; cursor:pointer;">Hapus Soal</button>
+                    </li>`;
+            });
+            soalHtml += '</ul>';
+
+            container.innerHTML += `
+                <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0;">${b.judul}</h3>
+                        <button onclick="hapusBacaan(${b.id})" style="background-color:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Hapus Teks & Semua Kuis</button>
+                    </div>
+
+                    <div style="margin-top:15px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>List Pertanyaan (Langkah 5):</strong>
+                        ${listSoal.length > 0 ? soalHtml : '<p><i>Belum ada kuis untuk bacaan ini.</i></p>'}
+                        <button onclick="tampilkanFormKuis(${b.id})">+ Tambah Pertanyaan Baru</button>
+                    </div>
+
+                    <!-- Form Sembunyi buat Tambah Kuis -->
+                    <div id="form-kuis-${b.id}" style="display:none; margin-top:15px; border-top: 1px dashed #ccc; padding-top:10px;">
+                        <h4>Form Tambah Soal</h4>
+                        <input type="text" id="soal-${b.id}" placeholder="Tulis soal di sini" style="width:100%; margin-bottom:5px;"><br>
+                        <input type="text" id="a-${b.id}" placeholder="Opsi A">
+                        <input type="text" id="b-${b.id}" placeholder="Opsi B"><br>
+                        <input type="text" id="c-${b.id}" placeholder="Opsi C">
+                        <input type="text" id="d-${b.id}" placeholder="Opsi D"><br>
+                        Kunci: <select id="kunci-${b.id}">
+                            <option value="A">A</option><option value="B">B</option>
+                            <option value="C">C</option><option value="D">D</option>
+                        </select>
+                        <button onclick="simpanKuis(${b.id})" style="background-color:green; color:white; border:none; padding:5px 10px;">Simpan Soal</button>
+                        <button onclick="document.getElementById('form-kuis-${b.id}').style.display='none'">Batal</button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 3. FUNGSI UNTUK HAPUS SOAL (LANGKAH 5)
+    async function hapusSoal(qId) {
+        if (confirm("Hapus soal ini?")) {
+            const res = await fetch(`/api/admin/bacaan/question/${qId}`, { method: 'DELETE' });
+            if (res.ok) loadBacaan();
+        }
+    }
+
+    // 4. FUNGSI UNTUK HAPUS BACAAN (LANGKAH 4)
+    async function hapusBacaan(id) {
+        if (confirm("Yakin hapus bacaan ini beserta kuisnya?")) {
+            const res = await fetch(`/api/admin/bacaan/delete/${id}`, { method: 'DELETE' });
+            if (res.ok) loadBacaan();
+        }
+    }
+
+    // 5. FUNGSI SIMPAN KUIS (LANGKAH 5)
+    async function simpanKuis(id) {
+        const data = {
+            soal: document.getElementById(`soal-${id}`).value,
+            opsiA: document.getElementById(`a-${id}`).value,
+            opsiB: document.getElementById(`b-${id}`).value,
+            opsiC: document.getElementById(`c-${id}`).value,
+            opsiD: document.getElementById(`d-${id}`).value,
+            kunciJawaban: document.getElementById(`kunci-${id}`).value
+        };
+        const res = await fetch(`/api/admin/bacaan/${id}/add-pertanyaan`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (res.ok) {
+            alert("Soal kuis ditambahkan!");
+            loadBacaan();
+        }
+    }
+
+    function tampilkanFormKuis(id) {
+        document.getElementById(`form-kuis-${id}`).style.display = 'block';
+    }
+
+    // Panggil saat halaman pertama kali dibuka
+    window.onload = loadBacaan;
+</script>
+</body>
+</html>

@@ -20,8 +20,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/static/**").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/static/**", "/js/**").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/google").permitAll()
+
+                        // --- INI TAMBAHANNYA ---
+                        // 1. Cuma user dengan Role ADMIN yang bisa akses /admin.html
+                        .requestMatchers("/admin.html").hasRole("ADMIN")
+
+                        // 2. Halaman profil & fitur update profil WAJIB LOGIN dulu
+                        .requestMatchers("/profile.html", "/api/user/**").authenticated()
+                        // -----------------------
+
                         .requestMatchers("/hitung").authenticated()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .anyRequest().permitAll()
