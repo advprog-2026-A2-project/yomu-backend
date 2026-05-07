@@ -1,15 +1,16 @@
 package id.ac.ui.cs.advprog.yomubackend.Bacaan.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Bacaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.Pertanyaan;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.BacaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.PertanyaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 /** Class untuk seeding data dummy. */
 @Component
