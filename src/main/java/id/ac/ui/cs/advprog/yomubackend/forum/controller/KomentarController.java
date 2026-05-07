@@ -119,6 +119,27 @@ public final class KomentarController {
     }
 
     /**
+     * Menghapus komentar sebagai admin.
+     *
+     * @param id ID komentar yang akan dihapus
+     * @param principal data user yang sedang login
+     * @return response kosong jika berhasil
+     */
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<?> deleteKomentarAsAdmin(
+            @PathVariable final Long id,
+            final Principal principal) {
+        try {
+            final String username = principal.getName();
+            komentarService.deleteKomentarAsAdmin(id, username);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Gagal menghapus: " + e.getMessage());
+        }
+    }
+
+    /**
      * Mengambil semua komentar utama untuk suatu bacaan.
      *
      * @param bacaanId ID bacaan

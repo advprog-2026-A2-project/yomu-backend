@@ -5,6 +5,8 @@ import id.ac.ui.cs.advprog.yomubackend.forum.model.KomentarRequest;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.Reaksi;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.KomentarRepository;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.ReaksiRepository;
+import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
+import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,9 @@ public final class KomentarServiceImpl implements KomentarService {
 
     /** Repository untuk akses data Reaksi. */
     private final ReaksiRepository reaksiRepository;
+
+    /** Repository untuk akses data User. */
+    private final UserRepository userRepository;
 
     /**
      * Membuat komentar baru atau balasan.
@@ -160,6 +165,31 @@ public final class KomentarServiceImpl implements KomentarService {
                 reaksiRepository.save(r);
             }
         }
+    }
+
+    /**
+     * Menghapus komentar sebagai admin.
+     *
+     * @param id ID komentar yang akan dihapus
+     * @param username username admin yang melakukan penghapusan
+     */
+    @Override
+    public void deleteKomentarAsAdmin(final Long id,
+            final String username) {
+        final User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "User tidak ditemukan"));
+
+        if (!user.getRole().equals("ADMIN")) {
+            throw new SecurityException(
+                    "Hanya admin yang dapat menghapus komentar");
+        }
+
+        komentarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Komentar tidak ditemukan"));
+
+        komentarRepository.deleteById(id);
     }
 }
 
