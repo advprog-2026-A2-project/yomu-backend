@@ -172,10 +172,29 @@ public final class KomentarServiceImpl implements KomentarService {
      *
      * @param id ID komentar yang akan dihapus
      * @param username username admin yang melakukan penghapusan
+     * @throws SecurityException jika user bukan admin
+     * @throws IllegalArgumentException jika user/komentar tidak ditemukan
      */
     @Override
     public void deleteKomentarAsAdmin(final Long id,
             final String username) {
+        verifyAdminUser(username);
+
+        komentarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Komentar tidak ditemukan"));
+
+        komentarRepository.deleteById(id);
+    }
+
+    /**
+     * Verifikasi bahwa user adalah admin.
+     *
+     * @param username username yang akan diverifikasi
+     * @throws SecurityException jika user bukan admin
+     * @throws IllegalArgumentException jika user tidak ditemukan
+     */
+    private void verifyAdminUser(final String username) {
         final User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User tidak ditemukan"));
@@ -184,12 +203,6 @@ public final class KomentarServiceImpl implements KomentarService {
             throw new SecurityException(
                     "Hanya admin yang dapat menghapus komentar");
         }
-
-        komentarRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Komentar tidak ditemukan"));
-
-        komentarRepository.deleteById(id);
     }
 }
 
