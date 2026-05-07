@@ -99,26 +99,6 @@ public final class KomentarController {
     }
 
     /**
-     * Menghapus komentar.
-     *
-     * @param id ID komentar yang akan dihapus
-     * @param principal data user yang sedang login
-     * @return response kosong jika berhasil
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteKomentar(
-            @PathVariable final Long id,
-            final Principal principal) {
-        try {
-            komentarService.deleteKomentar(id, getUserId(principal));
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body("Gagal menghapus: " + e.getMessage());
-        }
-    }
-
-    /**
      * Menghapus komentar sebagai admin.
      *
      * @param id ID komentar yang akan dihapus
@@ -132,6 +112,26 @@ public final class KomentarController {
         try {
             final String username = principal.getName();
             komentarService.deleteKomentarAsAdmin(id, username);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Gagal menghapus: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Menghapus komentar.
+     *
+     * @param id ID komentar yang akan dihapus
+     * @param principal data user yang sedang login
+     * @return response kosong jika berhasil
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteKomentar(
+            @PathVariable final Long id,
+            final Principal principal) {
+        try {
+            komentarService.deleteKomentar(id, getUserId(principal));
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest()

@@ -1,17 +1,19 @@
 package id.ac.ui.cs.advprog.yomubackend.forum.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
+import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.Komentar;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.KomentarRequest;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.Reaksi;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.KomentarRepository;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.ReaksiRepository;
-import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
-import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 /**
  * Implementasi dari antarmuka {@link KomentarService}.
@@ -199,9 +201,14 @@ public final class KomentarServiceImpl implements KomentarService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User tidak ditemukan"));
 
-        if (!user.getRole().equals("ADMIN")) {
+        final String userRole = user.getRole() != null
+                ? user.getRole().trim().toUpperCase()
+                : "";
+
+        if (!userRole.equals("ADMIN")) {
             throw new SecurityException(
-                    "Hanya admin yang dapat menghapus komentar");
+                    "Hanya admin yang dapat menghapus komentar. "
+                    + "Role anda: " + user.getRole());
         }
     }
 }
