@@ -1,7 +1,10 @@
 package id.ac.ui.cs.advprog.yomubackend.clan.controller;
 
+import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
+import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomubackend.clan.model.Clan;
 import id.ac.ui.cs.advprog.yomubackend.clan.repository.ClanRepository;
+import java.security.Principal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -14,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ClanController {
 
     private final ClanRepository clanRepository;
+    private final UserRepository userRepository;
 
-    public ClanController(ClanRepository clanRepository) {
+    public ClanController(ClanRepository clanRepository, UserRepository userRepository) {
         this.clanRepository = clanRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -32,8 +37,15 @@ public class ClanController {
     }
 
     @PostMapping("/create-clan")
-    public String simpanClan(@ModelAttribute Clan clan) {
+    public String simpanClan(@ModelAttribute Clan clan, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login.html";
+        }
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User tidak ditemukan"));
         clan.setNama(clan.getNama().trim());
+        clan.jadikanKetuaSebagaiAnggotaAwal(user);
         clanRepository.save(clan);
         return "redirect:/clan";
     }
