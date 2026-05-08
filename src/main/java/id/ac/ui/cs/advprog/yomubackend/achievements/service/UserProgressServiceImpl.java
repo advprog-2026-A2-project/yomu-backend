@@ -64,7 +64,13 @@ public class UserProgressServiceImpl implements UserProgressService {
         updateAchievementProgressAccuracy(user.getId(), score);
 
         // 3. Daily missions hari ini
-        updateDailyMissionProgress(user, kategori, score);
+        final boolean anyMissionJustCompleted =
+                updateDailyMissionProgress(user, kategori, score);
+
+        // 4. Jika ada daily mission yang baru selesai, trigger achievement COMPLETE_DAILY_MISSIONS
+        if (anyMissionJustCompleted) {
+            updateAchievementProgress(user.getId(), MilestoneType.COMPLETE_DAILY_MISSIONS, 1);
+        }
     }
 
     // ----------------------------------------------------------------
@@ -86,6 +92,21 @@ public class UserProgressServiceImpl implements UserProgressService {
     @Transactional
     public void handleClanPromotion(final String userId) {
         updateAchievementProgress(userId, MilestoneType.CLAN_PROMOTION, 1);
+    }
+
+    // ----------------------------------------------------------------
+    // handleStreakDay
+    // ----------------------------------------------------------------
+
+    @Override
+    @Transactional
+    public void handleStreakDay(final String username) {
+        final User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            log.warn("[Achievement] User tidak ditemukan saat handle streak: {}", username);
+            return;
+        }
+        updateAchievementProgress(user.getId(), MilestoneType.STREAK_DAYS, 1);
     }
 
     // ================================================================
@@ -163,13 +184,16 @@ public class UserProgressServiceImpl implements UserProgressService {
     /**
      * Perbarui semua UserDailyMission aktif milik user untuk hari ini.
      * Record dibuat otomatis jika belum ada.
+     *
+     * @return true jika ada minimal satu daily mission yang baru saja selesai
      */
-    private void updateDailyMissionProgress(
+    private boolean updateDailyMissionProgress(
             final User user, final String kategori, final int score) {
 
         final UUID userUuid = UUID.fromString(user.getId());
         final LocalDate today = LocalDate.now();
         final List<DailyMission> activeMissions = dailyMissionRepo.findByIsActiveTrue();
+        boolean anyJustCompleted = false;
 
         for (DailyMission mission : activeMissions) {
             final UserDailyMission udm = getOrCreateUserDailyMission(userUuid, mission, today);
@@ -182,11 +206,13 @@ public class UserProgressServiceImpl implements UserProgressService {
                 final boolean justCompleted = udm.updateProgress(newProgress);
                 userDailyMissionRepo.save(udm);
                 if (justCompleted) {
+                    anyJustCompleted = true;
                     log.info("[Achievement] User {} menyelesaikan daily mission: {}",
                             user.getUsername(), mission.getName());
                 }
             }
         }
+        return anyJustCompleted;
     }
 
     /**

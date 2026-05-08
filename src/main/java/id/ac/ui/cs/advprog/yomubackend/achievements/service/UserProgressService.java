@@ -45,4 +45,13 @@ public interface UserProgressService {
      * @param userId ID user
      */
     void handleClanPromotion(String userId);
+
+    /**
+     * Proses penambahan streak hari aktif pelajar.
+     * Dipanggil setiap hari user aktif (login dan menyelesaikan setidaknya satu kuis).
+     * Memperbarui achievement bertipe {@code STREAK_DAYS}.
+     *
+     * @param username username pelajar
+     */
+    void handleStreakDay(String username);
 }

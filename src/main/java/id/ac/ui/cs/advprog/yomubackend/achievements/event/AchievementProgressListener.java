@@ -37,6 +37,9 @@ public class AchievementProgressListener {
                     event.getUsername(),
                     event.getKategori(),
                     event.getScore());
+            // Setiap kali kuis selesai dihitung sebagai hari aktif untuk streak
+            // (UserProgressService resolve userId dari username secara internal)
+            userProgressService.handleStreakDay(event.getUsername());
         } catch (Exception ex) {
             log.error("[Achievement] Gagal memproses QuizCompletedEvent untuk user={}: {}",
                     event.getUsername(), ex.getMessage(), ex);
