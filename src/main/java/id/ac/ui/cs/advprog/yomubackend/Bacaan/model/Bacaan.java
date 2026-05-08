@@ -26,4 +26,7 @@ public class Bacaan {
     /** Konten teks bacaan. */
     @Column(columnDefinition = "TEXT", nullable = false)
     private String konten;
+    /** menghapus teks bacaan. */
+    @jakarta.persistence.OneToMany(mappedBy = "bacaan", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Pertanyaan> daftarPertanyaan;
 }
