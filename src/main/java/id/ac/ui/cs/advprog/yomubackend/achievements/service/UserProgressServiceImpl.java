@@ -225,10 +225,10 @@ public class UserProgressServiceImpl implements UserProgressService {
      * @return nilai progress baru (absolut, sesuai kontrak updateProgress)
      */
     private int calculateMissionProgress(
-            final UserDailyMission udm,
-            final DailyMission mission,
-            final String kategori,
-            final int score) {
+        final UserDailyMission udm,
+        final DailyMission mission,
+        final String kategori,
+        final int score) {
 
         return switch (mission.getRequirementType()) {
 

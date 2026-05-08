@@ -20,6 +20,7 @@ import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.BacaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.PertanyaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.RiwayatKuisRepository;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Controller untuk mengelola bacaan dan kuis.
@@ -42,6 +43,10 @@ public final class BacaanController {
     /** Repository user. */
     @Autowired
     private UserRepository userRepository;
+
+    /** Publisher untuk event Spring (digunakan untuk QuizCompletedEvent). */
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * Menampilkan daftar semua bacaan.
