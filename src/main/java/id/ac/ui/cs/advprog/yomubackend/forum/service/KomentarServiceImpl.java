@@ -1,15 +1,19 @@
 package id.ac.ui.cs.advprog.yomubackend.forum.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
+import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.Komentar;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.KomentarRequest;
 import id.ac.ui.cs.advprog.yomubackend.forum.model.Reaksi;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.KomentarRepository;
 import id.ac.ui.cs.advprog.yomubackend.forum.repository.ReaksiRepository;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 /**
  * Implementasi dari antarmuka {@link KomentarService}.
@@ -25,6 +29,9 @@ public final class KomentarServiceImpl implements KomentarService {
 
     /** Repository untuk akses data Reaksi. */
     private final ReaksiRepository reaksiRepository;
+
+    /** Repository untuk akses data User. */
+    private final UserRepository userRepository;
 
     /**
      * Membuat komentar baru atau balasan.
@@ -159,6 +166,49 @@ public final class KomentarServiceImpl implements KomentarService {
                 r.setJenisReaksi(jenisReaksi);
                 reaksiRepository.save(r);
             }
+        }
+    }
+
+    /**
+     * Menghapus komentar sebagai admin.
+     *
+     * @param id ID komentar yang akan dihapus
+     * @param username username admin yang melakukan penghapusan
+     * @throws SecurityException jika user bukan admin
+     * @throws IllegalArgumentException jika user/komentar tidak ditemukan
+     */
+    @Override
+    public void deleteKomentarAsAdmin(final Long id,
+            final String username) {
+        verifyAdminUser(username);
+
+        komentarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Komentar tidak ditemukan"));
+
+        komentarRepository.deleteById(id);
+    }
+
+    /**
+     * Verifikasi bahwa user adalah admin.
+     *
+     * @param username username yang akan diverifikasi
+     * @throws SecurityException jika user bukan admin
+     * @throws IllegalArgumentException jika user tidak ditemukan
+     */
+    private void verifyAdminUser(final String username) {
+        final User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "User tidak ditemukan"));
+
+        final String userRole = user.getRole() != null
+                ? user.getRole().trim().toUpperCase()
+                : "";
+
+        if (!userRole.equals("ADMIN")) {
+            throw new SecurityException(
+                    "Hanya admin yang dapat menghapus komentar. "
+                    + "Role anda: " + user.getRole());
         }
     }
 }

@@ -87,6 +87,7 @@ public final class BacaanController {
                 model.addAttribute("userId", user.getId());
                 model.addAttribute("displayName",
                         user.getDisplayName());
+                model.addAttribute("userRole", user.getRole());
             });
         }
         model.addAttribute("sudahDikerjakan", sudahDikerjakan);

@@ -52,5 +52,15 @@ public interface KomentarService {
      */
     void toggleReaksi(Long komentarId, String pelajarId,
             String jenisReaksi);
+
+    /**
+     * Menghapus komentar sebagai admin.
+     *
+     * @param id ID komentar yang akan dihapus.
+     * @param username Username admin yang melakukan penghapusan.
+     * @throws SecurityException jika user bukan admin.
+     * @throws IllegalArgumentException jika komentar tidak ditemukan.
+     */
+    void deleteKomentarAsAdmin(Long id, String username);
 }
 
