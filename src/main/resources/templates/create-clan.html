@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Buat Clan</title>
+</head>
+<body>
+
+<a th:href="@{/clan}">⬅ Kembali ke Clan</a>
+<hr>
+
+<h2>Buat Clan</h2>
+<form id="createClanForm" th:action="@{/clan/create-clan}" th:object="${clan}" method="post">
+    <input type="text" id="clan-name" th:field="*{nama}" placeholder="Nama Clan" required><br>
+    <button type="submit">Create Clan</button>
+</form>
+
+</body>
+</html>

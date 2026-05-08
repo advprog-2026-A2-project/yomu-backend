@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Daftar Clan</title>
+</head>
+<body>
+
+<a th:href="@{/}">⬅ Kembali ke menu Utama</a>
+<hr>
+<h2>Daftar Clan</h2>
+<a th:href="@{/clan/create-clan}"><button type="button">Buat Clan</button></a>
+
+<div th:if="${#lists.isEmpty(clans)}">
+    <p>Belum ada clan.</p>
+</div>
+
+
+<div th:unless="${#lists.isEmpty(clans)}">
+    <ul>
+        <li th:each="clan : ${clans}">
+            <span th:text="${clan.nama}">Nama Clan</span>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
