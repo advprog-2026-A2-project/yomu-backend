@@ -66,7 +66,9 @@ public class AchievementServiceImpl implements AchievementService {
         achievement.updateDetails(
                 request.getAchievementName(),
                 request.getAchievementDescription(),
-                request.getIconUrl());
+                request.getIconUrl(),
+                request.getMilestoneType(),
+                request.getMilestoneTargetValue());
         return new AchievementResponse(achievementsRepo.save(achievement));
     }
 

@@ -62,10 +62,13 @@ public class Achievements {
      * @param name nama Achievements
      * @param description desripsi Achievements
      * @param iconUrl icon Achievements*/
-    public void updateDetails(final String name, final String description, final String iconUrl) {
+    public void updateDetails(final String name, final String description, final String iconUrl,
+                              final MilestoneType milestoneType, final int milestoneTargetValue) {
         this.achievementName = name;
         this.achievementDescription = description;
         this.iconUrl = iconUrl;
+        this.milestoneType = milestoneType;
+        this.milestoneTargetValue = milestoneTargetValue;
     }
 
     /** Cek apakah progress yang diberikan sudah memenuhi milestone.

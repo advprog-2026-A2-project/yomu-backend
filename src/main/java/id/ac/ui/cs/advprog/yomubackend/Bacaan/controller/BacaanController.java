@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import id.ac.ui.cs.advprog.yomubackend.achievements.event.QuizCompletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -174,6 +175,13 @@ public final class BacaanController {
                 riwayatBaru.setBacaan(bc);
                 riwayatBaru.setNilai(nilaiAkhir);
                 riwayatKuisRepository.save(riwayatBaru);
+                eventPublisher.publishEvent(new QuizCompletedEvent(
+                        this,
+                        username,
+                        bacaanId,
+                        bc.getKategori(),
+                        nilaiAkhir
+                ));
             }
         }
 
