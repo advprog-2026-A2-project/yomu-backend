@@ -61,7 +61,12 @@ public class ClanController {
 
         Clan clan = clanRepository.findById(id)
                 .orElse(null);
-        if (clan == null || !principal.getName().equals(clan.getKetuaClan().getUsername())) {
+        boolean isKetuaClan = false;
+
+        if (clan != null) {
+            isKetuaClan = principal.getName().equals(clan.getKetuaClan().getUsername());
+        }
+        if (clan == null || !isKetuaClan) {
             return "redirect:/clan";
         }
 
