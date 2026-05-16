@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.yomubackend.clan.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -96,6 +97,42 @@ class ClanControllerTest {
                 .andExpect(redirectedUrl("/clan"));
 
         assertThat(clanRepository.findById(clan.getId())).isPresent();
+    }
+
+    @Test
+    @Transactional
+    void tampilkanClanShowsJoinButtonWhenUserIsNotMember() throws Exception {
+        User ketua = createUser("ketua");
+        createUser("calonAnggota");
+        createClan("Yomu Readers", ketua);
+
+        String response = mockMvc.perform(get("/clan")
+                        .with(user("calonAnggota")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(response).contains("Gabung Clan");
+    }
+
+    @Test
+    @Transactional
+    void tampilkanClanHidesJoinButtonWhenUserAlreadyMember() throws Exception {
+        User ketua = createUser("ketua");
+        User anggota = createUser("anggota");
+        Clan clan = createClan("Yomu Readers", ketua);
+        clan.tambahAnggota(anggota);
+        clanRepository.saveAndFlush(clan);
+
+        String response = mockMvc.perform(get("/clan")
+                        .with(user("anggota")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(response).doesNotContain("Gabung Clan");
     }
 
     private User createUser(String username) {

@@ -53,7 +53,7 @@ public class ClanController {
         return "redirect:/clan";
     }
 
-    @RequestMapping(value = "/delete-clan", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/delete-clan", method = { RequestMethod.GET, RequestMethod.POST })
     public String deleteClan(@RequestParam Long id, Principal principal) {
         if (principal == null) {
             return "redirect:/login.html";
@@ -72,6 +72,27 @@ public class ClanController {
 
         clan.getAnggota().clear();
         clanRepository.delete(clan);
+        return "redirect:/clan";
+    }
+
+    @PostMapping("/join-clan")
+    public String joinClan(@RequestParam Long id, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login.html";
+        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User tidak ditemukan"));
+
+        if (!"PELAJAR".equals(user.getRole())) {
+            return "redirect:/clan";
+        }
+        Clan clan = clanRepository.findById(id).orElse(null);
+        if (clan == null) {
+            return "redirect:/clan";
+        }
+        clan.tambahAnggota(user);
+        clanRepository.save(clan);
+
         return "redirect:/clan";
     }
 }

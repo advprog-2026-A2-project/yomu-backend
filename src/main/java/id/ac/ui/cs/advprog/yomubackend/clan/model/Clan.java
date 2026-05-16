@@ -46,4 +46,18 @@ public class Clan {
         anggota.clear();
         anggota.add(user);
     }
+
+    public void tambahAnggota(User user) {
+        if (!sudahMenjadiAnggota(user.getUsername())) {
+            anggota.add(user);
+        }
+    }
+
+    public boolean sudahMenjadiAnggota(String username) {
+        if (username == null) {
+            return false;
+        }
+        return anggota.stream()
+                .anyMatch(anggotaClan -> username.equals(anggotaClan.getUsername()));
+    }
 }
