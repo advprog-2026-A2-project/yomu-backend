@@ -30,10 +30,70 @@
 
 <hr>
 
+<div class="card">
+    <h3>Siklus Liga Clan</h3>
+    <button onclick="prosesPergantianMusim()">Proses Pergantian Musim</button>
+    <div id="season-result" style="margin-top: 10px;"></div>
+</div>
+
+<hr>
+
 <h3>Daftar Bacaan </h3>
 <div id="container-bacaan"></div>
 
 <script>
+    async function prosesPergantianMusim() {
+        if (!confirm("Proses akhir musim dan pindahkan tier clan berdasarkan klasemen akhir?")) {
+            return;
+        }
+
+        const resultContainer = document.getElementById('season-result');
+        resultContainer.textContent = 'Memproses pergantian musim...';
+
+        const res = await fetch('/api/admin/clan/seasons/end', {
+            method: 'POST'
+        });
+
+        if (!res.ok) {
+            resultContainer.textContent = 'Gagal memproses pergantian musim.';
+            return;
+        }
+
+        const data = await res.json();
+        const changedMovements = data.movements
+            .filter(movement => movement.movementType !== 'STAYED');
+        const movementItems = changedMovements
+            .slice(0, 10)
+            .map(formatMovement)
+            .join('');
+
+        resultContainer.innerHTML = `
+            <strong>Pergantian musim selesai.</strong><br>
+            Promosi: ${data.promotedCount} | Degradasi: ${data.demotedCount} | Tetap: ${data.stayedCount}
+            ${movementItems ? `<ul>${movementItems}</ul>` : '<p><i>Tidak ada perpindahan tier.</i></p>'}
+        `;
+    }
+
+    function formatMovement(movement) {
+        return `
+            <li>
+                ${escapeHtml(movement.clanName)}:
+                ${movement.previousTier} ke ${movement.newTier}
+                (rank ${movement.finalRank}, skor ${Number(movement.finalScore).toFixed(2)})
+            </li>`;
+    }
+
+    function escapeHtml(value) {
+        const replacements = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return String(value).replace(/[&<>"']/g, char => replacements[char]);
+    }
+
     // 1. FUNGSI UNTUK SIMPAN BACAAN BARU (LANGKAH 3)
     async function simpanBacaan() {
         const judul = document.getElementById('judul').value;

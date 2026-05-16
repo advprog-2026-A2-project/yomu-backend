@@ -13,4 +13,11 @@ public interface PertanyaanRepository extends JpaRepository<Pertanyaan, Long> {
      * @return List berisi pertanyaan terkait
      */
     List<Pertanyaan> findByBacaanId(Long bacaanId);
+
+    /**
+     * Menghitung jumlah pertanyaan pada bacaan tertentu.
+     * @param bacaanId ID dari bacaan
+     * @return jumlah pertanyaan
+     */
+    long countByBacaanId(Long bacaanId);
 }

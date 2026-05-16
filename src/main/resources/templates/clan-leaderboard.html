@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Leaderboard Liga Clan</title>
+</head>
+
+<body>
+
+    <a th:href="@{/clan}">⬅ Kembali ke Clan</a>
+    <hr>
+
+    <h2>Leaderboard Liga Clan</h2>
+
+    <div th:if="${errorMessage != null}">
+        <p th:text="${errorMessage}">Pelajar belum tergabung dalam clan</p>
+        <a th:href="@{/clan}"><button type="button">Cari Clan</button></a>
+    </div>
+
+    <div th:if="${leaderboard != null}">
+        <p>
+            Clan kamu:
+            <strong th:text="${leaderboard.currentClanName}">Nama Clan</strong>
+        </p>
+        <p>
+            Liga:
+            <strong th:text="${leaderboard.tierType}">BRONZE</strong>
+        </p>
+
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Clan</th>
+                    <th>Tier</th>
+                    <th>Anggota</th>
+                    <th>Skor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="entry : ${leaderboard.entries}"
+                    th:style="${entry.currentUserClan} ? 'font-weight:bold;' : ''">
+                    <td th:text="${entry.rank}">1</td>
+                    <td>
+                        <span th:text="${entry.clanName}">Nama Clan</span>
+                        <span th:if="${entry.currentUserClan}">(Clan Kamu)</span>
+                    </td>
+                    <td th:text="${entry.tierType}">BRONZE</td>
+                    <td th:text="${entry.memberCount}">1</td>
+                    <td th:text="${#numbers.formatDecimal(entry.score, 1, 2)}">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
