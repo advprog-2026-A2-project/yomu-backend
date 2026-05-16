@@ -19,6 +19,13 @@
     <ul>
         <li th:each="clan : ${clans}">
             <span th:text="${clan.nama}">Nama Clan</span>
+            <form th:if="${currentUsername == clan.ketuaClan.username}"
+                  th:action="@{/clan/delete-clan}"
+                  method="post"
+                  style="display:inline;">
+                <input type="hidden" name="id" th:value="${clan.id}">
+                <button type="submit">Hapus Clan</button>
+            </form>
         </li>
     </ul>
 </div>

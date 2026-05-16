@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/clan")
@@ -25,8 +27,9 @@ public class ClanController {
     }
 
     @GetMapping
-    public String tampilkanClan(Model model) {
+    public String tampilkanClan(Model model, Principal principal) {
         model.addAttribute("clans", clanRepository.findAll());
+        model.addAttribute("currentUsername", principal == null ? null : principal.getName());
         return "clan";
     }
 
@@ -47,6 +50,23 @@ public class ClanController {
         clan.setNama(clan.getNama().trim());
         clan.jadikanKetuaSebagaiAnggotaAwal(user);
         clanRepository.save(clan);
+        return "redirect:/clan";
+    }
+
+    @RequestMapping(value = "/delete-clan", method = {RequestMethod.GET, RequestMethod.POST})
+    public String deleteClan(@RequestParam Long id, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login.html";
+        }
+
+        Clan clan = clanRepository.findById(id)
+                .orElse(null);
+        if (clan == null || !principal.getName().equals(clan.getKetuaClan().getUsername())) {
+            return "redirect:/clan";
+        }
+
+        clan.getAnggota().clear();
+        clanRepository.delete(clan);
         return "redirect:/clan";
     }
 }
