@@ -10,12 +10,21 @@ import id.ac.ui.cs.advprog.yomubackend.Bacaan.model.RiwayatKuis;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.BacaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.PertanyaanRepository;
 import id.ac.ui.cs.advprog.yomubackend.Bacaan.repository.RiwayatKuisRepository;
+import id.ac.ui.cs.advprog.yomubackend.achievements.enums.MissionRequirementType;
+import id.ac.ui.cs.advprog.yomubackend.achievements.model.DailyMission;
+import id.ac.ui.cs.advprog.yomubackend.achievements.model.UserDailyMission;
+import id.ac.ui.cs.advprog.yomubackend.achievements.repository.DailyMissionRepository;
+import id.ac.ui.cs.advprog.yomubackend.achievements.repository.UserDailyMissionRepository;
 import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
 import id.ac.ui.cs.advprog.yomubackend.auth.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomubackend.clan.dto.ClanLeaderboardDto;
+import id.ac.ui.cs.advprog.yomubackend.clan.enums.ClanScoreModifierType;
 import id.ac.ui.cs.advprog.yomubackend.clan.enums.TierType;
 import id.ac.ui.cs.advprog.yomubackend.clan.model.Clan;
 import id.ac.ui.cs.advprog.yomubackend.clan.repository.ClanRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +56,16 @@ class LeaderboardServiceTest {
     @Autowired
     private RiwayatKuisRepository riwayatKuisRepository;
 
+    @Autowired
+    private DailyMissionRepository dailyMissionRepository;
+
+    @Autowired
+    private UserDailyMissionRepository userDailyMissionRepository;
+
     @BeforeEach
     void setUp() {
+        userDailyMissionRepository.deleteAll();
+        dailyMissionRepository.deleteAll();
         riwayatKuisRepository.deleteAll();
         pertanyaanRepository.deleteAll();
         bacaanRepository.deleteAll();
@@ -122,6 +139,83 @@ class LeaderboardServiceTest {
     }
 
     @Test
+    void leaderboardAppliesProductivityBuffWhenHalfMembersCompleteDailyMission() {
+        Bacaan quiz = createBacaan("Productive Quiz", 1);
+        DailyMission mission = createDailyMission();
+
+        User alpha = createUser("productiveAlpha");
+        User beta = createUser("productiveBeta");
+        Clan clan = createClan("Productive Readers", TierType.BRONZE, alpha);
+        clan.tambahAnggota(beta);
+        clanRepository.saveAndFlush(clan);
+
+        createHistory("productiveAlpha", quiz, 50);
+        createHistory("productiveBeta", quiz, 50);
+        completeDailyMission(alpha, mission);
+
+        ClanLeaderboardDto leaderboard = leaderboardService
+                .getCurrentLeagueLeaderboard("productiveAlpha");
+
+        assertThat(leaderboard.getEntries().getFirst().getScore())
+                .isCloseTo(120.0, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getScoreMultiplier())
+                .isCloseTo(1.2, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getActiveScoreModifiers())
+                .containsExactly("Productivity Buff");
+    }
+
+    @Test
+    void leaderboardAppliesLowAccuracyPenaltyWhenAverageAccuracyBelowFifty() {
+        Bacaan quiz = createBacaan("Low Accuracy Quiz", 1);
+
+        User alpha = createUser("lowAccuracyAlpha");
+        createClan("Careful Readers", TierType.BRONZE, alpha);
+        createHistory("lowAccuracyAlpha", quiz, 40);
+
+        ClanLeaderboardDto leaderboard = leaderboardService
+                .getCurrentLeagueLeaderboard("lowAccuracyAlpha");
+
+        assertThat(leaderboard.getEntries().getFirst().getScore())
+                .isCloseTo(32.0, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getScoreMultiplier())
+                .isCloseTo(0.8, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getActiveScoreModifiers())
+                .containsExactly("Low Accuracy Penalty");
+    }
+
+    @Test
+    void scoreModifiersStackMultiplicativelyWithActiveClanItems() {
+        Bacaan quiz = createBacaan("Stacking Quiz", 1);
+        DailyMission mission = createDailyMission();
+
+        User alpha = createUser("stackAlpha");
+        User beta = createUser("stackBeta");
+        Clan clan = createClan("Stacked Readers", TierType.BRONZE, alpha);
+        clan.tambahAnggota(beta);
+        clan.aktifkanScoreModifier(ClanScoreModifierType.DOUBLE_XP);
+        clan.aktifkanScoreModifier(ClanScoreModifierType.DOUBLE_XP);
+        clanRepository.saveAndFlush(clan);
+
+        createHistory("stackAlpha", quiz, 40);
+        createHistory("stackBeta", quiz, 40);
+        completeDailyMission(alpha, mission);
+
+        ClanLeaderboardDto leaderboard = leaderboardService
+                .getCurrentLeagueLeaderboard("stackAlpha");
+
+        assertThat(leaderboard.getEntries().getFirst().getScore())
+                .isCloseTo(307.2, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getScoreMultiplier())
+                .isCloseTo(3.84, within(0.001));
+        assertThat(leaderboard.getEntries().getFirst().getActiveScoreModifiers())
+                .containsExactly(
+                        "Double XP",
+                        "Double XP",
+                        "Productivity Buff",
+                        "Low Accuracy Penalty");
+    }
+
+    @Test
     void leaderboardThrowsWhenUserDoesNotHaveClan() {
         createUser("lonely");
 
@@ -171,5 +265,30 @@ class LeaderboardServiceTest {
         history.setBacaan(bacaan);
         history.setNilai(nilai);
         riwayatKuisRepository.saveAndFlush(history);
+    }
+
+    private DailyMission createDailyMission() {
+        DailyMission mission = DailyMission.builder()
+                .name("Daily Reading")
+                .description("Selesaikan bacaan harian")
+                .requirementType(MissionRequirementType.COMPLETE_N_READINGS)
+                .requirementTargetValue(1)
+                .rewardXp(10)
+                .isActive(true)
+                .build();
+        return dailyMissionRepository.saveAndFlush(mission);
+    }
+
+    private void completeDailyMission(User user, DailyMission mission) {
+        UserDailyMission progress = UserDailyMission.builder()
+                .userId(UUID.fromString(user.getId()))
+                .mission(mission)
+                .date(LocalDate.now())
+                .currentProgress(1)
+                .isCompleted(true)
+                .completedAt(LocalDateTime.now())
+                .rewardClaimed(false)
+                .build();
+        userDailyMissionRepository.saveAndFlush(progress);
     }
 }

@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.yomubackend.clan.model;
 
 import id.ac.ui.cs.advprog.yomubackend.auth.model.User;
+import id.ac.ui.cs.advprog.yomubackend.clan.enums.ClanScoreModifierType;
 import id.ac.ui.cs.advprog.yomubackend.clan.enums.TierType;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -41,6 +42,17 @@ public class Clan {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> anggota = new ArrayList<>();
 
+    /** Modifier skor aktif dari item atau efek eksplisit clan. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "clan_score_modifiers",
+            joinColumns = @JoinColumn(name = "clan_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modifier_type", nullable = false)
+    @OrderColumn(name = "stack_order")
+    private List<ClanScoreModifierType> activeScoreModifiers =
+            new ArrayList<>();
+
     public void jadikanKetuaSebagaiAnggotaAwal(User user) {
         ketuaClan = user;
         anggota.clear();
@@ -59,5 +71,19 @@ public class Clan {
         }
         return anggota.stream()
                 .anyMatch(anggotaClan -> username.equals(anggotaClan.getUsername()));
+    }
+
+    public void aktifkanScoreModifier(ClanScoreModifierType modifierType) {
+        if (modifierType == null) {
+            throw new IllegalArgumentException("Modifier skor wajib diisi");
+        }
+        activeScoreModifiers.add(modifierType);
+    }
+
+    public boolean nonaktifkanScoreModifier(ClanScoreModifierType modifierType) {
+        if (modifierType == null) {
+            return false;
+        }
+        return activeScoreModifiers.remove(modifierType);
     }
 }

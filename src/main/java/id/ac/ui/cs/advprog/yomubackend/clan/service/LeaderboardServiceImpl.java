@@ -2,11 +2,13 @@ package id.ac.ui.cs.advprog.yomubackend.clan.service;
 
 import id.ac.ui.cs.advprog.yomubackend.clan.dto.ClanLeaderboardDto;
 import id.ac.ui.cs.advprog.yomubackend.clan.dto.LeaderboardEntryDto;
+import id.ac.ui.cs.advprog.yomubackend.clan.enums.ClanScoreModifierType;
 import id.ac.ui.cs.advprog.yomubackend.clan.enums.TierType;
 import id.ac.ui.cs.advprog.yomubackend.clan.model.Clan;
 import id.ac.ui.cs.advprog.yomubackend.clan.repository.ClanRepository;
 import id.ac.ui.cs.advprog.yomubackend.clan.scoring.ClanScoreStrategy;
 import id.ac.ui.cs.advprog.yomubackend.clan.scoring.ClanScoreStrategyFactory;
+import id.ac.ui.cs.advprog.yomubackend.clan.scoring.ClanScoreModifierService;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -19,12 +21,15 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     private final ClanRepository clanRepository;
     private final ClanScoreStrategyFactory scoreStrategyFactory;
+    private final ClanScoreModifierService scoreModifierService;
 
     public LeaderboardServiceImpl(
             ClanRepository clanRepository,
-            ClanScoreStrategyFactory scoreStrategyFactory) {
+            ClanScoreStrategyFactory scoreStrategyFactory,
+            ClanScoreModifierService scoreModifierService) {
         this.clanRepository = clanRepository;
         this.scoreStrategyFactory = scoreStrategyFactory;
+        this.scoreModifierService = scoreModifierService;
     }
 
     @Override
@@ -42,9 +47,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         List<ScoredClan> scoredClans = clanRepository
                 .findByTierType(currentTier)
                 .stream()
-                .map(clan -> new ScoredClan(
-                        clan,
-                        strategy.calculateScore(clan)))
+                .map(clan -> scoreClan(clan, strategy))
                 .sorted(Comparator
                         .comparingDouble(ScoredClan::score)
                         .reversed()
@@ -70,6 +73,20 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 entries);
     }
 
+    private ScoredClan scoreClan(Clan clan, ClanScoreStrategy strategy) {
+        double baseScore = strategy.calculateScore(clan);
+        List<ClanScoreModifierType> activeModifiers =
+                scoreModifierService.getActiveModifiers(clan);
+        double finalScore = scoreModifierService.calculateFinalScore(
+                baseScore,
+                activeModifiers);
+        return new ScoredClan(
+                clan,
+                finalScore,
+                calculateMultiplier(activeModifiers),
+                activeModifiers);
+    }
+
     private Clan getCurrentClan(String username) {
         return clanRepository
                 .findByAnggota_UsernameOrderByIdAsc(username)
@@ -91,9 +108,24 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 clan.getTierType(),
                 clan.getAnggota().size(),
                 scoredClan.score(),
-                Objects.equals(clan.getId(), currentClan.getId()));
+                Objects.equals(clan.getId(), currentClan.getId()),
+                scoredClan.scoreMultiplier(),
+                scoredClan.activeModifiers().stream()
+                        .map(ClanScoreModifierType::getDisplayName)
+                        .toList());
     }
 
-    private record ScoredClan(Clan clan, double score) {
+    private double calculateMultiplier(
+            List<ClanScoreModifierType> activeModifiers) {
+        return activeModifiers.stream()
+                .mapToDouble(ClanScoreModifierType::getMultiplier)
+                .reduce(1.0, (left, right) -> left * right);
+    }
+
+    private record ScoredClan(
+            Clan clan,
+            double score,
+            double scoreMultiplier,
+            List<ClanScoreModifierType> activeModifiers) {
     }
 }
