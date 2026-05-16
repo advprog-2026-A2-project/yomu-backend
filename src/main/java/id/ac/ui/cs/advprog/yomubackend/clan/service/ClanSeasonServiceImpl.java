@@ -102,7 +102,7 @@ public class ClanSeasonServiceImpl implements ClanSeasonService {
                 || clanCount < MINIMUM_CLANS_FOR_MOVEMENT) {
             return 0;
         }
-        return Math.min(PROMOTION_SLOTS, clanCount / 2);
+        return Math.min(PROMOTION_SLOTS, clanCount / 3);
     }
 
     private int calculateDemotionSlots(TierType tierType, int clanCount) {
@@ -110,7 +110,7 @@ public class ClanSeasonServiceImpl implements ClanSeasonService {
                 || clanCount < MINIMUM_CLANS_FOR_MOVEMENT) {
             return 0;
         }
-        return Math.min(DEMOTION_SLOTS, clanCount / 2);
+        return Math.min(DEMOTION_SLOTS, clanCount / 3);
     }
 
     private TierType determineNewTier(
