@@ -24,8 +24,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/google").permitAll()
 
                         // --- INI TAMBAHANNYA ---
-                        // 1. Cuma user dengan Role ADMIN yang bisa akses /admin.html
-                        .requestMatchers("/admin.html").hasRole("ADMIN")
+                        // 1. Cuma user dengan Role ADMIN yang bisa akses dashboard dan API admin
+                        .requestMatchers("/admin.html", "/api/admin/**").hasRole("ADMIN")
 
                         // 2. Halaman profil & fitur update profil WAJIB LOGIN dulu
                         .requestMatchers("/profile.html", "/api/user/**").authenticated()
