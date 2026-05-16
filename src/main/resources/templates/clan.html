@@ -10,7 +10,16 @@
     <a th:href="@{/}">⬅ Kembali ke menu Utama</a>
     <hr>
     <h2>Daftar Clan</h2>
-    <a th:href="@{/clan/create-clan}"><button type="button">Buat Clan</button></a>
+    <a th:if="${currentUsername != null and !currentUserHasClan}"
+       th:href="@{/clan/create-clan}">
+        <button type="button">Buat Clan</button>
+    </a>
+    <a th:if="${currentUserHasClan}" th:href="@{/clan/leaderboard}">
+        <button type="button">Leaderboard Liga</button>
+    </a>
+    <p th:if="${currentUserHasClan}">
+        Kamu sudah tergabung dalam clan.
+    </p>
 
     <div th:if="${#lists.isEmpty(clans)}">
         <p>Belum ada clan.</p>
@@ -21,12 +30,13 @@
         <ul>
             <li th:each="clan : ${clans}">
                 <span th:text="${clan.nama}">Nama Clan</span>
+                <span th:text="'(' + ${clan.tierType} + ')'">(BRONZE)</span>
                 <form th:if="${currentUsername == clan.ketuaClan.username}" th:action="@{/clan/delete-clan}"
                     method="post" style="display:inline;">
                     <input type="hidden" name="id" th:value="${clan.id}">
                     <button type="submit">Hapus Clan</button>
                 </form>
-                <form th:if="${currentUsername != null and !clan.sudahMenjadiAnggota(currentUsername)}"
+                <form th:if="${currentUsername != null and !currentUserHasClan and !clan.sudahMenjadiAnggota(currentUsername)}"
                       th:action="@{/clan/join-clan}" method="post"
                       style="display:inline;">
                     <input type="hidden" name="id" th:value="${clan.id}">
